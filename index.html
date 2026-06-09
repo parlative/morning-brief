@@ -828,41 +828,45 @@ async function loadWeather() {
     const uv=Math.round(c.uv_index||0), uvInfo=uvLabel(uv);
     const uvPct=Math.min(uv/11,1)*100;
 
-    // Build hourly rain forecast for today (use local date, not UTC)
+    // Stündliche Regenvorhersage: heute ab jetzt, sonst morgen
     const nowLocal = new Date();
     const nowHour = nowLocal.getHours();
     const pad2 = n => String(n).padStart(2,'0');
     const todayLocal = `${nowLocal.getFullYear()}-${pad2(nowLocal.getMonth()+1)}-${pad2(nowLocal.getDate())}`;
-    const rainTimes = [];
+    const tomorrowDate = new Date(nowLocal); tomorrowDate.setDate(tomorrowDate.getDate()+1);
+    const tomorrowLocal = `${tomorrowDate.getFullYear()}-${pad2(tomorrowDate.getMonth()+1)}-${pad2(tomorrowDate.getDate())}`;
+
+    const rainToday = [], rainTomorrow = [];
     if (h && h.time) {
       h.time.forEach((t, i) => {
-        // API returns local time strings like "2026-06-09T14:00" — match local date
-        if (!t.startsWith(todayLocal)) return;
-        const hr = parseInt(t.slice(11,13));
-        if (hr < nowHour) return; // only future hours
         const mm = h.precipitation[i] || 0;
         const prob = h.precipitation_probability ? h.precipitation_probability[i] : null;
-        if (mm > 0.05 || (prob && prob >= 30)) {
-          rainTimes.push({ hr, mm, prob });
+        const hasRain = mm > 0.05 || (prob && prob >= 30);
+        if (!hasRain) return;
+        if (t.startsWith(todayLocal)) {
+          const hr = parseInt(t.slice(11,13));
+          if (hr >= nowHour) rainToday.push({ hr, mm, prob, label: `${pad2(hr)}:00 Uhr` });
+        } else if (t.startsWith(tomorrowLocal)) {
+          const hr = parseInt(t.slice(11,13));
+          rainTomorrow.push({ hr, mm, prob, label: `Morgen ${pad2(hr)}:00 Uhr` });
         }
       });
     }
-    // "No rain" only if BOTH daily sum is 0 AND daily probability < 30%
-    const definitelyNoRain = precSum <= 0 && precPro < 30;
+
     let rainHtml = '';
-    if (rainTimes.length) {
-      const rows = rainTimes.slice(0,8).map(r =>
-        `<span class="rain-slot">
-          <span class="rain-time">${String(r.hr).padStart(2,'0')}:00 Uhr</span>
-          <span class="rain-mm">${r.mm>0.05?r.mm.toFixed(1)+' mm':'–'}</span>
-          ${r.prob!=null?`<span class="rain-prob">${r.prob}%</span>`:''}
-        </span>`
+    const rainSource = rainToday.length ? rainToday : rainTomorrow;
+    const rainLabel = rainToday.length ? '☔ Regen heute um:' : '☔ Regen morgen um:';
+    if (rainSource.length) {
+      const rows = rainSource.slice(0,8).map(r =>
+        `<div class="rain-slot">
+          <span class="rain-time">${r.label}</span>
+          <span class="rain-mm">${r.mm>0.05 ? r.mm.toFixed(1)+' mm' : '–'}</span>
+          ${r.prob!=null ? `<span class="rain-prob">${r.prob}%</span>` : ''}
+        </div>`
       ).join('');
-      rainHtml = `<div class="rain-forecast"><div class="w-item-label" style="margin-bottom:7px">☔ Regenvorhersage heute</div><div class="rain-slots">${rows}</div></div>`;
-    } else if (precSum > 0 || precPro >= 30) {
-      rainHtml = `<div class="rain-forecast"><div class="w-item-label" style="margin-bottom:4px;color:#1d4ed8">☔ Regen erwartet: ${precSum>0?precSum.toFixed(1)+' mm · ':''}${precPro}% Wahrscheinlichkeit</div></div>`;
-    } else if (definitelyNoRain) {
-      rainHtml = `<div class="rain-forecast" style="background:#f0fff4;"><div class="w-item-label" style="margin-bottom:4px;color:#16a34a">🌵 Kein Regen heute erwartet</div></div>`;
+      rainHtml = `<div class="rain-forecast"><div class="w-item-label" style="margin-bottom:7px;font-size:12px;color:#1d4ed8;font-weight:700">${rainLabel}</div><div class="rain-slots">${rows}</div></div>`;
+    } else {
+      rainHtml = `<div class="rain-forecast" style="background:#f0fff4;"><div class="w-item-label" style="color:#16a34a;font-size:12px">🌵 Kein Regen in den nächsten 48h erwartet</div></div>`;
     }
 
     document.getElementById('weather-section').innerHTML=`
