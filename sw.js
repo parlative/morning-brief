@@ -1,6 +1,6 @@
 // Service Worker — Maya's Morning Brief
-const CACHE_NAME = 'maya-brief-v9';
-const DATA_CACHE = 'maya-data-v9';
+const CACHE_NAME = 'maya-brief-v10';
+const DATA_CACHE = 'maya-data-v10';
 
 // Install: skip waiting immediately
 self.addEventListener('install', e => {
@@ -20,7 +20,6 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = e.request.url;
 
-  // HTML pages: always fetch fresh from network
   if (url.endsWith('.html') || url.endsWith('/') || url.includes('index')) {
     e.respondWith(
       fetch(e.request, { cache: 'no-store' })
@@ -29,15 +28,10 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // API/data requests: network first, cache as offline fallback
   if (
-    url.includes('open-meteo.com') ||
-    url.includes('ipapi.co') ||
-    url.includes('rss2json.com') ||
-    url.includes('allorigins.win') ||
-    url.includes('corsproxy.io') ||
-    url.includes('gnews.io') ||
-    url.includes('mymemory')
+    url.includes('open-meteo.com') || url.includes('ipapi.co') ||
+    url.includes('ipwho.is') || url.includes('ip-api.com') ||
+    url.includes('rss2json.com') || url.includes('mymemory')
   ) {
     e.respondWith(
       fetch(e.request)
@@ -51,8 +45,45 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Everything else: network first
   e.respondWith(
     fetch(e.request).catch(() => caches.match(e.request))
+  );
+});
+
+// ═══════════════════════════════════════════════════════
+// PUSH NOTIFICATIONS
+// ═══════════════════════════════════════════════════════
+self.addEventListener('push', e => {
+  let data = { title: "Maya's Morning Brief", body: '🌅 Dein Brief ist bereit!', tag: 'brief-refresh' };
+  try { data = { ...data, ...e.data.json() }; } catch {}
+
+  e.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: './icon.png',
+      badge: './icon.png',
+      tag: data.tag || 'brief-refresh',
+      renotify: true,
+      requireInteraction: false,
+      data: { url: data.url || './' }
+    })
+  );
+});
+
+// Tap on notification → open / focus the app
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const targetUrl = (e.notification.data && e.notification.data.url) || './';
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for (const client of list) {
+        if (client.url.includes('maysbrief') || client.url.includes('Morning-Brief')) {
+          client.focus();
+          client.postMessage({ type: 'PUSH_REFRESH' });
+          return;
+        }
+      }
+      return clients.openWindow(targetUrl);
+    })
   );
 });
