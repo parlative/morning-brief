@@ -1,0 +1,23 @@
+name = "maya-brief-push"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# KV Namespace für Subscriptions (muss einmal angelegt werden)
+[[kv_namespaces]]
+binding = "SUBSCRIPTIONS"
+id = "PLACEHOLDER_KV_ID"          # wird beim ersten Deploy ersetzt
+
+# Cron Triggers — 5x täglich + Mitternacht (UTC-Zeiten für Berlin)
+# Berlin Winter (UTC+1): 00:00 = 23:00 UTC, 06:00 = 05:00 UTC etc.
+# Berlin Sommer (UTC+2): 00:00 = 22:00 UTC, 06:00 = 04:00 UTC etc.
+# Wir nehmen UTC+1 als Basis (Worker erkennt Sommer/Winter selbst)
+[triggers]
+crons = [
+  "0 23 * * *",    # 00:00 Berlin (Winter UTC+1)
+  "0 5 * * *",     # 06:00 Berlin
+  "0 11 * * *",    # 12:00 Berlin
+  "0 13 * * *",    # 14:00 Berlin
+  "0 15 * * *",    # 16:00 Berlin
+  "30 17 * * *",   # 18:30 Berlin
+]
