@@ -466,6 +466,11 @@
       </button>
     </div>
     <div id="offline-badge" class="offline-badge">📴 Offline — letzte Daten werden angezeigt</div>
+    <div id="push-banner" style="display:none;margin-top:6px;">
+      <button onclick="requestPushPermission()" style="background:linear-gradient(135deg,#0a84ff,#0055cc);color:#fff;border:none;border-radius:20px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:0.2px;">
+        🔔 Benachrichtigungen aktivieren
+      </button>
+    </div>
   </div>
 
   <div id="header-spacer" style="height:0px"></div>
@@ -561,8 +566,71 @@
 // ═══════════════════════════════════════════════════════
 // SERVICE WORKER
 // ═══════════════════════════════════════════════════════
+// ── VAPID Public Key (für Web Push) ──────────────────────────────────
+const VAPID_PUBLIC_KEY = 'BJtHjlU94cINezIzs2rK9EQDdFxLYr7zhhWtCk9JR5WRUwho-VDJ8l2GTPt7VTETl123WLLubqxsVOHqUHoQb1U';
+
+// Cloudflare Worker Endpoint (sendet Push + speichert Subscriptions)
+const PUSH_SERVER = 'https://maya-brief-push.parlative.workers.dev';
+
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
+  navigator.serviceWorker.register('./sw.js').then(reg => {
+    // Lausche auf PUSH_REFRESH vom Service Worker
+    navigator.serviceWorker.addEventListener('message', e => {
+      if (e.data?.type === 'PUSH_REFRESH') {
+        loadAll(false);
+        showToast('🔄 Brief aktualisiert!');
+      }
+    });
+    // Auto-Subscribe wenn Notifications erlaubt
+    if (Notification.permission === 'granted') {
+      subscribePush(reg);
+    }
+  }).catch(() => {});
+}
+
+// ── Push Subscription ────────────────────────────────────────────────
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g,'+').replace(/_/g,'/');
+  const raw = atob(base64);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+async function subscribePush(reg) {
+  try {
+    reg = reg || await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    }
+    // Schicke Subscription an Cloudflare Worker
+    await fetch(PUSH_SERVER + '/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(sub)
+    });
+    return sub;
+  } catch(e) {
+    console.warn('Push subscribe failed:', e);
+  }
+}
+
+async function requestPushPermission() {
+  if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+    showToast('❌ Push nicht unterstützt');
+    return;
+  }
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    const reg = await navigator.serviceWorker.ready;
+    await subscribePush(reg);
+    showToast('🔔 Benachrichtigungen aktiviert!');
+  } else {
+    showToast('❌ Benachrichtigungen abgelehnt');
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -589,6 +657,18 @@ function updateOfflineStatus() {
 window.addEventListener('online', updateOfflineStatus);
 window.addEventListener('offline', updateOfflineStatus);
 updateOfflineStatus();
+
+// Push-Banner anzeigen wenn noch keine Permission
+function updatePushBanner() {
+  const banner = document.getElementById('push-banner');
+  if (!banner) return;
+  if ('Notification' in window && Notification.permission === 'default' && 'serviceWorker' in navigator) {
+    banner.style.display = 'block';
+  } else {
+    banner.style.display = 'none';
+  }
+}
+updatePushBanner();
 
 // ═══════════════════════════════════════════════════════
 // GREETING
