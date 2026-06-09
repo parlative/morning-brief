@@ -1025,7 +1025,7 @@ async function loadWeather() {
       <div class="card">
         <div class="card-header">
           <div class="card-title">🌡️ Wetter · 📍 ${city}</div>
-          <button class="share-btn" onclick="shareCard('weather-section','🌡️','Wetter')">⎙ Teilen</button>
+          <button class="share-btn" onclick="shareCardAsImage('weather-section','🌡️ Wetter')">📸 Teilen</button>
         </div>
         <div class="weather-top">
           <div>
@@ -1088,7 +1088,7 @@ async function loadWeather() {
       <div class="card">
         <div class="card-header">
           <div class="card-title">📅 7-Tage-Vorschau</div>
-          <button class="share-btn" onclick="shareWeek()">⎙ Teilen</button>
+          <button class="share-btn" onclick="shareCardAsImage('week-section','📅 7-Tage-Vorschau')">📸 Teilen</button>
         </div>
         <div class="week-row">${weekHtml}</div>
       </div>`;
@@ -1179,7 +1179,7 @@ async function loadNews() {
         <div class="card">
           <div class="card-header">
             <div class="card-title">📰 Breaking News</div>
-            <button class="share-btn" onclick="shareCard('news-section','📰','Breaking News')">⎙ Teilen</button>
+            <button class="share-btn" onclick="shareCardAsImage('news-section','📰 Breaking News')">📸 Teilen</button>
           </div>
           ${html}
         </div>`;
@@ -1260,7 +1260,7 @@ async function loadWarNews() {
     <div class="card war-card">
       <div class="card-header">
         <div class="card-title"><span class="live-dot"></span>Israel · 🇺🇸 USA · 🇮🇷 Iran</div>
-        <button class="share-btn" onclick="shareCard('war-section','🔴','Israel · USA · Iran')">⎙ Teilen</button>
+        <button class="share-btn" onclick="shareCardAsImage('war-section','🔴 Israel · USA · Iran')">📸 Teilen</button>
       </div>
       ${html}
     </div>`;
@@ -1316,7 +1316,7 @@ function renderWord() {
     <div class="card word-card">
       <div class="card-header">
         <div class="card-title">📖 Word of the Day</div>
-        <button class="share-btn" onclick="shareCard('word-section','📖','Word of the Day')">⎙ Teilen</button>
+        <button class="share-btn" onclick="shareCardAsImage('word-section','📖 Word of the Day')">📸 Teilen</button>
       </div>
       <div class="word-main">${w.w}</div>
       <div class="word-phonetic">${w.ph}</div>
@@ -1576,7 +1576,7 @@ function renderSummary() {
     <div class="summary-card" style="animation-delay:0.22s">
       <div class="summary-card-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
         <div class="summary-card-title" style="margin-bottom:0;">📰 Top News des Tages</div>
-        <button class="share-btn" onclick="shareCard('news-section','📰','Breaking News')">⎙ Teilen</button>
+        <button class="share-btn" onclick="shareCardAsImage('news-section','📰 Breaking News')">📸 Teilen</button>
       </div>
       ${newsHtml}
     </div>`;
@@ -1611,6 +1611,44 @@ async function captureCardAsBlob(cardId) {
     logging: false,
   });
   return new Promise(res => canvas.toBlob(res, 'image/png'));
+}
+
+// ── Universelle Screenshot-Share Funktion ────────────────────────────
+// Macht einen Screenshot vom Kasten und zeigt Instagram-Sheet
+async function shareCardAsImage(sectionId, label) {
+  haptic('medium');
+  const btn = event?.target?.closest('.share-btn');
+  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+
+  try {
+    await loadHtml2Canvas();
+    // Den Card-Container finden
+    const section = document.getElementById(sectionId);
+    const card = section?.querySelector('.card, .summary-card') || section;
+    if (!card) { showToast('Nichts zum Teilen'); return; }
+
+    // Screenshot mit 3x Skalierung für scharfe Bilder
+    const canvas = await html2canvas(card, {
+      scale: 3,
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      logging: false,
+      allowTaint: true,
+    });
+
+    if (btn) { btn.textContent = '📸 Teilen'; btn.disabled = false; }
+
+    canvas.toBlob(blob => {
+      if (!blob) { showToast('Fehler beim Erstellen'); return; }
+      const file = new File([blob], 'maya-brief.png', { type: 'image/png' });
+      const imgUrl = URL.createObjectURL(blob);
+      showImageShareSheet(blob, '📸', label, sectionId);
+    }, 'image/png', 0.95);
+
+  } catch(e) {
+    if (btn) { btn.textContent = '📸 Teilen'; btn.disabled = false; }
+    showToast('Teilen nicht verfügbar');
+  }
 }
 
 async function shareCard(cardId, emoji, title) {
@@ -2187,8 +2225,23 @@ const photoCurated = [
 ];
 
 async function loadPhotos() {
-  const doy = getDailyIndex(999); // absoluterTagesindex → wechselt täglich
+  const doy = getDailyIndex(999);
   const cats = [0,1,2].map(i => photoCurated[(doy + i * 2) % photoCurated.length]);
+
+  // Fotos direkt komplett rendern — kein zweistufiger Ansatz mehr
+  const galleryHtml = cats.map((cat, i) => {
+    const p = cat.photos[(doy + i) % cat.photos.length];
+    const src = `https://images.unsplash.com/photo-${p.id}?w=800&h=800&fit=crop&q=85&auto=format`;
+    const srcLarge = `https://images.unsplash.com/photo-${p.id}?w=1600&h=1600&fit=crop&q=90&auto=format`;
+    return `
+      <div class="photo-item" onclick="openLightbox('${srcLarge}','${cat.tag} — ${p.cap}')">
+        <img src="${src}" alt="${p.cap}"
+          style="width:160px;height:160px;object-fit:cover;display:block;border-radius:12px"
+          loading="eager" decoding="async">
+        <div class="photo-tag">${cat.tag}</div>
+        <div class="photo-caption">${p.cap}</div>
+      </div>`;
+  }).join('');
 
   document.getElementById('photo-section').innerHTML = `
     <div class="card photo-card">
@@ -2196,28 +2249,8 @@ async function loadPhotos() {
         <div class="card-title" style="margin:0">📸 Photos of the Day</div>
         <button class="share-btn" onclick="shareCard('photo-section','📸','Photos of the Day')">⎙ Teilen</button>
       </div>
-      <div class="photo-gallery" id="photo-gallery-inner">
-        ${cats.map(()=>`<div style="width:160px;height:160px;border-radius:12px;background:linear-gradient(135deg,#f0f0f0,#e8e8e8);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px">⏳</div>`).join('')}
-      </div>
+      <div class="photo-gallery">${galleryHtml}</div>
     </div>`;
-
-  const galleryHtml = cats.map((cat, i) => {
-    const p = cat.photos[(doy + i) % cat.photos.length];
-    // Unsplash direkte Bild-URL (immer verfügbar, kein API-Key nötig)
-    const src = `https://images.unsplash.com/photo-${p.id}?w=800&h=800&fit=crop&q=85&auto=format`;
-    const srcLarge = `https://images.unsplash.com/photo-${p.id}?w=1600&h=1600&fit=crop&q=90&auto=format`;
-    return `
-      <div class="photo-item" onclick="openLightbox('${srcLarge}','${cat.tag} — ${p.cap}')">
-        <img src="${src}" alt="${p.cap}"
-          style="width:160px;height:160px;object-fit:cover;display:block;border-radius:12px"
-          loading="eager">
-        <div class="photo-tag">${cat.tag}</div>
-        <div class="photo-caption">${p.cap}</div>
-      </div>`;
-  }).join('');
-
-  const inner = document.getElementById('photo-gallery-inner');
-  if (inner) inner.innerHTML = galleryHtml;
 }
 
 function openLightbox(src, caption) {
@@ -2709,7 +2742,7 @@ function renderRecipe(offset) {
     <div class="card recipe-card">
       <div class="card-header">
         <div class="card-title">🍽️ Rezept des Tages</div>
-        <button class="share-btn" onclick="shareRecipe()">⎙ Teilen</button>
+        <button class="share-btn" onclick="shareCardAsImage('recipe-section','🍽️ Rezept des Tages')">📸 Teilen</button>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <button onclick="haptic();renderRecipe(${_recipeOffset - 1})" style="background:#fff3e8;border:1.5px solid #f8c8a0;border-radius:12px;padding:8px 16px;font-size:18px;cursor:pointer;color:#a05020;font-weight:700;">←</button>
