@@ -1,0 +1,2224 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Maya's Brief">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icon_1024.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./icon_1024.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="./icon_1024.png">
+  <link rel="apple-touch-icon" sizes="1024x1024" href="./icon_1024.png">
+  <title>Maya's Morning Brief</title>
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --card: #ffffff;
+      --text: #1d1d1f;
+      --subtext: #6e6e73;
+      --accent: #ff9f0a;
+      --accent2: #30d158;
+      --accent3: #0a84ff;
+      --accent4: #ff375f;
+      --border: #e5e5ea;
+      --shadow: 0 2px 14px rgba(0,0,0,0.07);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html { height: 100%; }
+    body {
+      font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100%;
+      /* Dynamic Island / notch safe area */
+      padding-top: max(env(safe-area-inset-top), 54px);
+      padding-bottom: calc(env(safe-area-inset-bottom) + 68px);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Tab bar ── */
+    .tab-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-top: 0.5px solid rgba(0,0,0,0.12);
+      display: flex;
+      padding-bottom: env(safe-area-inset-bottom);
+      z-index: 100;
+    }
+    .tab-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 0 6px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      gap: 2px;
+      transition: opacity 0.15s;
+      min-height: 49px;
+    }
+    .tab-btn:active { opacity: 0.5; }
+    .tab-icon { font-size: 24px; line-height: 1; }
+    .tab-label { font-size: 10px; font-weight: 500; color: var(--subtext); letter-spacing: 0.2px; }
+    .tab-btn.active .tab-label { color: var(--accent3); font-weight: 600; }
+
+    /* ── Pages ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(160deg, #fff8ec 0%, #fffdf5 60%, #f0f8ff 100%);
+      padding: 14px 14px 16px;
+      text-align: center;
+      border-bottom: 0.5px solid var(--border);
+    }
+    .header-btn-row { display: none; } /* removed global buttons */
+    /* pull-to-refresh indicator — hidden, functionality kept */
+    .ptr-indicator { display: none !important; }
+    .header-deco {
+      font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: #c0a060; margin-bottom: 6px; font-weight: 600;
+    }
+    .greeting { font-size: 26px; font-weight: 700; letter-spacing: -0.3px; color: var(--text); line-height: 1.2; }
+    .greeting .sun { display: inline-block; animation: sway 4s ease-in-out infinite; }
+    @keyframes sway { 0%,100%{transform:rotate(-8deg)} 50%{transform:rotate(8deg)} }
+    .date-line { font-size: 15px; color: var(--subtext); margin-top: 5px; font-weight: 500; }
+    .last-update-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px; }
+    .last-update { font-size: 11px; color: #bbb; }
+    .refresh-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: transparent; color: #bbb;
+      border: none; border-radius: 50%;
+      width: 26px; height: 26px; font-size: 16px;
+      cursor: pointer; transition: opacity 0.2s, transform 0.15s;
+      flex-shrink: 0; padding: 0;
+    }
+    .refresh-btn:active { opacity: 0.5; transform: scale(0.9); }
+    .refresh-btn.loading { opacity: 0.35; pointer-events: none; }
+    .spin { display: inline-block; }
+    .refresh-btn.loading .spin { animation: spinning 0.7s linear infinite; }
+    @keyframes spinning { to { transform: rotate(360deg); } }
+    .offline-badge { display:none; background:#ff9f0a22; color:#b06000; border:1px solid #ff9f0a55; border-radius:20px; padding:3px 10px; font-size:11px; font-weight:600; margin:6px auto 0; width:fit-content; }
+    .offline-badge.visible { display: block; }
+    .refresh-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: #e8f0fe; color: #1a56cc;
+      border: 1px solid #b0ccf8; border-radius: 50%;
+      width: 34px; height: 34px; font-size: 17px;
+      cursor: pointer; transition: opacity 0.2s, transform 0.15s;
+      flex-shrink: 0;
+    }
+    .refresh-btn:active { opacity: 0.7; transform: scale(0.9); }
+    .refresh-btn.loading { opacity: 0.45; pointer-events: none; }
+    .spin { display: inline-block; }
+    .refresh-btn.loading .spin { animation: spinning 0.7s linear infinite; }
+    @keyframes spinning { to { transform: rotate(360deg); } }
+    .global-share-btn { display: none; }
+
+    /* ── Animations ── */
+    @keyframes fadeSlideUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes tempPop { from{transform:scale(0.7);opacity:0} to{transform:scale(1);opacity:1} }
+    @keyframes bounce { 0%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} 60%{transform:translateY(-3px)} }
+    @keyframes borderGlow {
+      0%,100%{box-shadow:0 2px 14px rgba(0,0,0,0.07),0 0 0 0 rgba(100,150,255,0)}
+      50%{box-shadow:0 2px 14px rgba(0,0,0,0.07),0 0 0 4px rgba(100,150,255,0.18)}
+    }
+    @keyframes pulse-dot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:0.5} }
+
+    /* ── Cards ── */
+    .content { padding: 12px 12px 0; max-width: 430px; margin: 0 auto; }
+    .card {
+      background: var(--card); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 15px;
+      margin-bottom: 10px; border: 1px solid var(--border);
+      animation: fadeSlideUp 0.4s ease both;
+    }
+    .card-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.9px; color: var(--subtext); margin-bottom: 11px; }
+
+    /* ── Holiday ── */
+    .holiday-card { background: linear-gradient(135deg,#fff8dc,#fff0a0); border-color:#f0c840; }
+    .holiday-emoji { font-size: 36px; margin-bottom: 6px; }
+    .holiday-name { font-size: 21px; font-weight: 700; color: #6a4200; }
+    .holiday-type { font-size: 13px; color: #9a6010; margin-top: 4px; font-weight: 500; }
+
+    /* ── Birthday ── */
+    .birthday-card { background: linear-gradient(135deg,#fff0f5,#fce4ec); border-color:#ffb3c6; }
+    .birthday-top { display: flex; align-items: center; gap: 14px; }
+    .birthday-days { font-size: 56px; font-weight: 800; color: var(--accent4); line-height: 1; letter-spacing: -3px; animation: bounce 2.5s ease-in-out infinite; }
+    .birthday-right .birthday-label { font-size: 15px; color: #b03050; font-weight: 600; line-height: 1.4; }
+    .birthday-right .birthday-sub { font-size: 13px; color: #c06080; margin-top: 3px; }
+
+    /* ── Weather ── */
+    .weather-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:16px; }
+    .weather-temp-big { font-size: 60px; font-weight: 200; letter-spacing: -3px; color: var(--text); line-height: 1; display: inline-block; animation: tempPop 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+    .weather-icon-big { font-size: 56px; line-height: 1; }
+    .weather-desc { font-size: 16px; color: var(--text); font-weight: 600; margin-top: 4px; }
+    .weather-feels { font-size: 13px; color: var(--subtext); margin-top: 2px; }
+    .weather-location { font-size: 12px; color: var(--subtext); margin-top: 2px; }
+    .weather-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .w-item { background: var(--bg); border-radius: 13px; padding: 11px 13px; }
+    .w-item-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .w-item-val { font-size: 17px; font-weight: 600; color: var(--text); }
+    .w-item-sub { font-size: 12px; color: var(--subtext); margin-top: 2px; }
+    .minmax-row { display: flex; gap: 9px; margin-top: 9px; }
+    .mm-pill { flex:1; border-radius:13px; padding:10px 12px; text-align:center; }
+    .mm-pill span { font-size:11px; color:var(--subtext); display:block; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px; }
+    .mm-pill strong { font-size: 22px; font-weight: 700; }
+    .mm-min { background: #e8f4ff; } .mm-min strong { color: var(--accent3); }
+    .mm-max { background: #fff0f0; } .mm-max strong { color: var(--accent4); }
+
+    /* ── UV Index bar ── */
+    .uv-row { margin-top: 10px; }
+    .uv-label-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--subtext); margin-bottom: 5px; }
+    .uv-bar-bg { height: 8px; border-radius: 4px; background: linear-gradient(to right,#30d158,#ffd60a,#ff9f0a,#ff375f,#bf5af2); overflow: visible; position: relative; }
+    .uv-marker { width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 2px solid #333; position: absolute; top: -3px; transform: translateX(-50%); transition: left 0.6s ease; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+
+    /* ── Weekly forecast ── */
+    .week-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+    .week-row::-webkit-scrollbar { display: none; }
+    .week-day { flex: 0 0 auto; background: var(--bg); border-radius: 13px; padding: 10px 8px; text-align: center; min-width: 52px; }
+    .week-day.today { background: #e8f0fe; border: 1.5px solid #b0ccf8; }
+    .week-day-name { font-size: 11px; font-weight: 700; color: var(--subtext); text-transform: uppercase; }
+    .week-day-icon { font-size: 22px; margin: 5px 0; }
+    .week-day-max { font-size: 14px; font-weight: 700; color: var(--text); }
+    .week-day-min { font-size: 12px; color: var(--subtext); margin-top: 2px; }
+
+    /* ── Steps ── */
+    .steps-card { background: linear-gradient(135deg,#f0fff4,#e6ffee); border-color: #86efac; }
+    .steps-ring-wrap { display: flex; align-items: center; gap: 16px; }
+    .steps-ring { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
+    .steps-ring svg { transform: rotate(-90deg); }
+    .steps-ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .steps-ring-pct { font-size: 15px; font-weight: 800; color: #16a34a; }
+    .steps-ring-label { font-size: 9px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+    .steps-info { flex: 1; }
+    .steps-count { font-size: 28px; font-weight: 800; color: #16a34a; letter-spacing: -1px; line-height: 1; }
+    .steps-goal { font-size: 13px; color: #4ade80; font-weight: 500; margin-top: 3px; }
+    .steps-extra { font-size: 12px; color: #059669; margin-top: 4px; font-weight: 600; }
+    .steps-btn-row { display: flex; gap: 8px; margin-top: 12px; }
+    .steps-btn { flex: 1; background: #dcfce7; color: #16a34a; border: 1.5px solid #86efac; border-radius: 12px; padding: 8px 0; font-size: 13px; font-weight: 700; cursor: pointer; transition: transform 0.1s; }
+    .steps-btn:active { transform: scale(0.95); }
+    .steps-btn.minus { background: #fff; color: #6b7280; border-color: #d1d5db; }
+    .steps-reset { margin-top: 6px; width: 100%; background: none; border: none; color: #9ca3af; font-size: 11px; cursor: pointer; padding: 4px; }
+    /* manual input row */
+    .steps-input-row { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+    .steps-input { flex: 1; background: #fff; border: 1.5px solid #86efac; border-radius: 12px; padding: 9px 12px; font-size: 16px; font-weight: 600; color: var(--text); text-align: center; outline: none; -webkit-appearance: none; }
+    .steps-input:focus { border-color: #16a34a; box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .steps-set-btn { background: #16a34a; color: #fff; border: none; border-radius: 12px; padding: 9px 18px; font-size: 14px; font-weight: 700; cursor: pointer; transition: transform 0.1s, opacity 0.15s; flex-shrink: 0; }
+    .steps-set-btn:active { transform: scale(0.95); opacity: 0.85; }
+    .steps-hint { font-size: 11px; color: #9ca3af; text-align: center; margin-top: 5px; }
+    /* calorie panels */
+    .kcal-divider { height: 1px; background: #bbf7d0; margin: 14px 0; }
+    .kcal-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 2px; }
+    .kcal-panel { border-radius: 13px; padding: 12px; }
+    .kcal-panel.gym  { background: #fff7ed; border: 1.5px solid #fdba74; }
+    .kcal-panel.rest { background: #eff6ff; border: 1.5px solid #93c5fd; }
+    .kcal-panel-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+    .kcal-panel.gym  .kcal-panel-title { color: #c2410c; }
+    .kcal-panel.rest .kcal-panel-title { color: #1d4ed8; }
+    .kcal-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+    .kcal-label { font-size: 11px; color: var(--subtext); }
+    .kcal-val { font-size: 14px; font-weight: 700; color: var(--text); }
+    .kcal-extra-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+    .kcal-extra-label { font-size: 11px; color: #059669; }
+    .kcal-extra-val { font-size: 14px; font-weight: 700; color: #059669; }
+    .kcal-total-row { border-top: 1px solid rgba(0,0,0,0.08); margin-top: 6px; padding-top: 6px; display: flex; justify-content: space-between; align-items: baseline; }
+    .kcal-total-label { font-size: 11px; font-weight: 700; color: var(--text); }
+    .kcal-panel.gym  .kcal-total-val { font-size: 18px; font-weight: 800; color: #ea580c; }
+    .kcal-panel.rest .kcal-total-val { font-size: 18px; font-weight: 800; color: #2563eb; }
+    .kcal-note { font-size: 10px; color: #9ca3af; text-align: center; margin-top: 8px; }
+
+    /* ── News ── */
+    .news-item { padding:11px 0; border-bottom:1px solid var(--border); display:flex; gap:11px; align-items:flex-start; }
+    .news-item:last-child { border-bottom:none; padding-bottom:0; }
+    .news-num { font-size:12px; font-weight:700; color:#fff; background:var(--text); border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+    .news-text { font-size:14px; line-height:1.5; font-weight:500; color:var(--text); }
+    .news-source { font-size:11px; color:var(--subtext); margin-top:3px; }
+    .war-card { border-left: 4px solid var(--accent4); }
+    .war-card .news-num { background: var(--accent4); }
+    .live-dot { display:inline-block; width:7px; height:7px; background:var(--accent4); border-radius:50%; margin-right:5px; animation:pulse-dot 1.8s ease-in-out infinite; vertical-align:middle; position:relative; top:-1px; }
+
+    /* ── Word of Day ── */
+    .word-card { background: linear-gradient(135deg,#f0f4ff,#e8edff); border-color: #c7d2fe; }
+    .word-main { font-size: 28px; font-weight: 800; color: #3730a3; letter-spacing: -0.5px; }
+    .word-phonetic { font-size: 13px; color: #818cf8; margin-top: 2px; }
+    .word-pos { display: inline-block; background: #e0e7ff; color: #4338ca; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 8px 0 6px; }
+    .word-def { font-size: 14px; line-height: 1.55; color: #3730a3; font-weight: 500; }
+    .word-example { font-size: 13px; color: #6366f1; margin-top: 7px; font-style: italic; }
+    .word-de { font-size: 13px; color: #818cf8; margin-top: 5px; }
+
+    /* ── History ── */
+    .history-card { background: linear-gradient(135deg,#fdf4ff,#f5e9ff); border-color: #e9d5ff; }
+    .history-year { font-size: 42px; font-weight: 800; color: #7c3aed; letter-spacing: -2px; line-height: 1; }
+    .history-text { font-size: 15px; line-height: 1.55; color: #5b21b6; font-weight: 500; margin-top: 6px; }
+    .history-ago { font-size: 12px; color: #a78bfa; margin-top: 5px; font-weight: 600; }
+
+    /* ── Motivation ── */
+    .motivation-card { background: linear-gradient(135deg,#e8f0ff,#f0f5ff); border-color: #a0b8f0; animation: fadeSlideUp 0.4s ease both, borderGlow 4s ease-in-out infinite 0.4s; }
+    .motivation-emoji { font-size: 32px; margin-bottom: 8px; }
+    .motivation-quote { font-size: 17px; font-weight: 600; line-height: 1.55; color: #1a3a7a; font-style: italic; }
+    .motivation-translation { font-size: 13px; color: #5a7ab0; margin-top: 7px; line-height: 1.5; font-style: normal; font-weight: 400; }
+    .motivation-author { font-size: 13px; color: #4a7acc; margin-top: 9px; font-weight: 600; }
+
+    /* ── Evening Summary page ── */
+    .summary-header { background: linear-gradient(160deg,#1a1a2e,#16213e,#0f3460); padding: 36px 20px 24px; text-align: center; position: relative; }
+    .summary-title { font-size: 26px; font-weight: 700; color: #fff; }
+    .summary-sub { font-size: 14px; color: rgba(255,255,255,0.6); margin-top: 6px; }
+    .summary-stars { font-size: 20px; margin-top: 8px; letter-spacing: 4px; }
+    .summary-content { padding: 14px; max-width: 480px; margin: 0 auto; }
+    .summary-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; margin-bottom: 14px; border: 1px solid var(--border); animation: fadeSlideUp 0.4s ease both; }
+    .summary-card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.9px; color: var(--subtext); margin-bottom: 12px; }
+    .summary-unavail { font-size: 14px; color: var(--subtext); text-align: center; padding: 16px 0; }
+    .recap-item { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid var(--border); }
+    .recap-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .recap-num { font-size: 11px; font-weight: 700; color: #fff; background: #7c3aed; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .recap-text { font-size: 14px; line-height: 1.5; color: var(--text); font-weight: 500; }
+    .weather-recap-row { display: flex; justify-content: space-around; text-align: center; padding: 6px 0; }
+    .wr-item span { display: block; font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .wr-item strong { font-size: 20px; font-weight: 700; color: var(--text); }
+    .steps-recap { display: flex; align-items: center; justify-content: space-between; }
+    .steps-recap-num { font-size: 40px; font-weight: 800; color: #16a34a; letter-spacing: -2px; }
+    .steps-recap-info { text-align: right; }
+    .steps-recap-info span { display: block; font-size: 13px; color: var(--subtext); }
+    .steps-recap-info strong { font-size: 15px; font-weight: 700; color: var(--text); }
+
+    /* ── Share button ── */
+    .share-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: none; border: 1px solid var(--border);
+      border-radius: 20px; padding: 4px 10px;
+      font-size: 11px; font-weight: 600; color: var(--subtext);
+      cursor: pointer; float: right; margin-top: -2px;
+      transition: background 0.15s;
+    }
+    .share-btn:active { background: var(--bg); }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 13px; }
+    .card-header .card-title { margin-bottom: 0; }
+    /* global share — defined above in header section */
+
+    /* ── Photo of the Day ── */
+    .photo-card { padding: 0; overflow: hidden; }
+    .photo-card .card-title { padding: 14px 18px 0; margin-bottom: 10px; }
+    .photo-gallery { display: flex; gap: 8px; overflow-x: auto; padding: 0 18px 14px; scrollbar-width: none; }
+    .photo-gallery::-webkit-scrollbar { display: none; }
+    .photo-item { flex: 0 0 auto; position: relative; border-radius: 12px; overflow: hidden; cursor: pointer; }
+    .photo-item img { width: 160px; height: 160px; object-fit: cover; display: block; transition: transform 0.3s; }
+    .photo-item:active img { transform: scale(0.97); }
+    .photo-caption { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.7)); color: #fff; font-size: 10px; padding: 18px 8px 6px; font-weight: 500; line-height: 1.3; }
+    .photo-tag { position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,0.5); color: #fff; font-size: 9px; font-weight: 700; border-radius: 6px; padding: 2px 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    /* lightbox */
+    .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 999; align-items: center; justify-content: center; flex-direction: column; padding: 20px; }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 100%; max-height: 70vh; border-radius: 12px; object-fit: contain; }
+    .lightbox-caption { color: #fff; font-size: 13px; text-align: center; margin-top: 12px; line-height: 1.5; max-width: 340px; }
+    .lightbox-close { position: absolute; top: 20px; right: 20px; color: #fff; font-size: 28px; cursor: pointer; background: none; border: none; line-height: 1; }
+
+    /* ── To-Do ── */
+    .todo-card { background: linear-gradient(135deg,#fafafa,#f5f5f7); }
+    .todo-add-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    .todo-add-input { flex: 1; background: #fff; border: 1.5px solid var(--border); border-radius: 12px; padding: 9px 12px; font-size: 14px; color: var(--text); outline: none; }
+    .todo-add-input:focus { border-color: var(--accent3); box-shadow: 0 0 0 3px rgba(10,132,255,0.12); }
+    .todo-add-btn { background: var(--accent3); color: #fff; border: none; border-radius: 12px; padding: 9px 16px; font-size: 14px; font-weight: 700; cursor: pointer; transition: transform 0.1s; }
+    .todo-add-btn:active { transform: scale(0.95); }
+    .todo-item { border-radius: 12px; margin-bottom: 6px; background: #fff; border: 1px solid var(--border); overflow: hidden; }
+    .todo-item.done { opacity: 0.55; }
+    .todo-main-row { display: flex; align-items: center; gap: 10px; padding: 11px 12px; }
+    .todo-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); background: #fff; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .todo-item.done .todo-check { background: var(--accent2); border-color: var(--accent2); }
+    .todo-check-tick { color: #fff; font-size: 13px; font-weight: 800; display: none; }
+    .todo-item.done .todo-check-tick { display: block; }
+    .todo-text { flex: 1; font-size: 14px; font-weight: 500; color: var(--text); cursor: pointer; }
+    .todo-item.done .todo-text { text-decoration: line-through; color: var(--subtext); }
+    .todo-expand-btn { background: none; border: none; color: var(--subtext); font-size: 18px; cursor: pointer; padding: 0 4px; line-height: 1; }
+    .todo-delete-btn { background: none; border: none; color: #d1d5db; font-size: 16px; cursor: pointer; padding: 0 2px; }
+    .todo-delete-btn:active { color: var(--accent4); }
+    /* subtasks */
+    .todo-subs { padding: 0 12px 8px 44px; display: none; }
+    .todo-subs.open { display: block; }
+    .todo-sub-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-top: 1px solid #f0f0f2; }
+    .todo-sub-check { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #d1d5db; background: #fff; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .todo-sub-check.done { background: var(--accent2); border-color: var(--accent2); }
+    .todo-sub-text { flex: 1; font-size: 13px; color: var(--subtext); cursor: pointer; }
+    .todo-sub-text.done { text-decoration: line-through; }
+    .todo-sub-del { background: none; border: none; color: #e5e5ea; font-size: 14px; cursor: pointer; }
+    .todo-sub-add-row { display: flex; gap: 6px; margin-top: 6px; }
+    .todo-sub-add-input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 12px; color: var(--text); outline: none; }
+    .todo-sub-add-btn { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 12px; color: var(--accent3); font-weight: 700; cursor: pointer; }
+    /* carried over section */
+    .todo-carryover { margin-top: 10px; border-top: 1px dashed var(--border); padding-top: 10px; }
+    .todo-carryover-title { font-size: 11px; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+    .todo-carryover-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: #fffbeb; border-radius: 10px; margin-bottom: 5px; border: 1px solid #fde68a; cursor: pointer; }
+    .todo-carryover-text { font-size: 13px; color: #92400e; flex: 1; }
+    .todo-carryover-badge { font-size: 10px; background: #fcd34d; color: #78350f; border-radius: 6px; padding: 2px 6px; font-weight: 700; }
+    .todo-carryover-add-btn { background: none; border: none; color: var(--accent3); font-size: 11px; font-weight: 700; cursor: pointer; }
+    .todo-stats { display: flex; gap: 12px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+    .todo-stat { font-size: 12px; color: var(--subtext); }
+    .todo-stat strong { color: var(--text); }
+
+    /* ── Rain forecast ── */
+    .rain-forecast { margin-top: 10px; background: #f0f8ff; border-radius: 12px; padding: 10px 12px; }
+    .rain-slots { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+    .rain-slot { display: flex; flex-direction: column; align-items: center; background: #fff; border: 1px solid #bde0fe; border-radius: 10px; padding: 5px 8px; min-width: 48px; }
+    .rain-time { font-size: 11px; font-weight: 700; color: #1d4ed8; }
+    .rain-mm { font-size: 12px; font-weight: 600; color: var(--text); }
+    .rain-prob { font-size: 10px; color: var(--subtext); }
+
+    /* ── Recipe ── */
+    .recipe-card { background: linear-gradient(135deg,#fff8f0,#fdf0e8); border-color:#f8d4b0; }
+    .recipe-kcal-badge { display:inline-block; background:#ff6b2b; color:#fff; border-radius:10px; padding:2px 10px; font-size:11px; font-weight:700; margin-bottom:10px; }
+    .recipe-name { font-size:18px; font-weight:700; color:#7a3810; margin-bottom:6px; }
+    .recipe-macros { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+    .recipe-macro { background:#fff; border:1px solid #f8c8a0; border-radius:8px; padding:4px 10px; font-size:11px; font-weight:600; color:#7a3810; }
+    .recipe-section-title { font-size:11px; font-weight:700; color:#a05020; text-transform:uppercase; letter-spacing:0.7px; margin:10px 0 6px; }
+    .recipe-ingredients { list-style:none; }
+    .recipe-ingredients li { font-size:13px; color:#5a2e10; padding:3px 0; display:flex; justify-content:space-between; border-bottom:1px solid rgba(248,180,120,0.2); }
+    .recipe-ingredients li:last-child { border-bottom:none; }
+    .recipe-steps { }
+    .recipe-step { font-size:13px; color:#5a2e10; padding:5px 0 5px 28px; position:relative; border-bottom:1px solid rgba(248,180,120,0.15); line-height:1.5; }
+    .recipe-step:last-child { border-bottom:none; }
+    .recipe-step::before { content:attr(data-n); position:absolute; left:0; top:5px; background:#ff6b2b; color:#fff; border-radius:50%; width:18px; height:18px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; }
+    .recipe-airfryer { background:#fff3e0; border:1px solid #ffcc80; border-radius:10px; padding:8px 12px; margin-top:10px; font-size:12px; color:#7a4500; }
+    .recipe-airfryer strong { font-weight:700; }
+
+    /* ── Shimmer ── */
+    .shimmer { background: linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; height: 18px; margin: 7px 0; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .error-msg { font-size: 13px; color: #aaa; text-align: center; padding: 10px 0; }
+
+    /* ── Evening locked overlay ── */
+    .evening-locked { padding: 40px 20px; text-align: center; }
+    .evening-locked-icon { font-size: 48px; margin-bottom: 12px; }
+    .evening-locked-text { font-size: 16px; color: var(--subtext); line-height: 1.6; }
+    .evening-locked-time { font-size: 28px; font-weight: 800; color: var(--text); margin: 8px 0; }
+  </style>
+</head>
+<body>
+
+<!-- ═══ PAGE 1: TODAY ═══ -->
+<div id="page-today" class="page active">
+  <div class="header">
+    <div class="header-deco">✨ Dein persönlicher Überblick ✨</div>
+    <div id="greeting" class="greeting">Good Morning, Maya <span class="sun">☀️</span></div>
+    <div id="date-line" class="date-line"></div>
+    <div class="last-update-row">
+      <span id="last-update" class="last-update"></span>
+      <button class="refresh-btn" id="refresh-btn" onclick="haptic('medium'); refresh()" aria-label="Aktualisieren">
+        <span class="spin" id="spin-icon">↻</span>
+      </button>
+    </div>
+    <div id="offline-badge" class="offline-badge">📴 Offline — letzte Daten werden angezeigt</div>
+  </div>
+
+  <div class="content">
+    <div id="holiday-section"></div>
+    <div id="birthday-section"></div>
+    <div id="steps-section"></div>
+    <div id="weather-section">
+      <div class="card"><div class="card-title">🌤️ Wetter</div>
+        <div class="shimmer" style="width:40%;height:50px"></div>
+        <div class="shimmer" style="width:65%"></div><div class="shimmer" style="width:45%"></div>
+      </div>
+    </div>
+    <div id="week-section"></div>
+    <div id="news-section">
+      <div class="card"><div class="card-title">📰 Breaking News</div>
+        <div class="shimmer"></div><div class="shimmer"></div><div class="shimmer" style="width:70%"></div>
+      </div>
+    </div>
+    <div id="war-section">
+      <div class="card war-card"><div class="card-title">🔴 Israel · USA · Iran</div>
+        <div class="shimmer"></div><div class="shimmer" style="width:80%"></div>
+      </div>
+    </div>
+    <div id="todo-section"></div>
+    <div id="photo-section"></div>
+    <div id="word-section"></div>
+    <div id="history-section"></div>
+    <div id="motivation-section">
+      <div class="card motivation-card">
+        <div class="shimmer" style="width:90%;height:16px"></div>
+        <div class="shimmer" style="width:55%;height:13px;margin-top:8px"></div>
+      </div>
+    </div>
+    <div id="recipe-section"></div>
+  </div>
+</div>
+
+<!-- ═══ PAGE 2: EVENING SUMMARY ═══ -->
+<div id="page-evening" class="page">
+  <div class="summary-header">
+    <div class="summary-stars">⭐ ✨ 🌙</div>
+    <div class="summary-title">Tages­zusammenfassung</div>
+    <div id="summary-date" class="summary-sub"></div>
+  </div>
+  <div class="summary-content" id="summary-content">
+    <!-- filled by renderSummary() -->
+  </div>
+</div>
+
+<!-- Pull-to-refresh indicator -->
+<div id="ptr-indicator" class="ptr-indicator">↓ Loslassen zum Aktualisieren</div>
+
+<!-- ═══ LIGHTBOX ═══ -->
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="" alt="">
+  <div id="lightbox-caption" class="lightbox-caption"></div>
+</div>
+
+<!-- ═══ TAB BAR ═══ -->
+<div class="tab-bar">
+  <button class="tab-btn active" id="tab-today" onclick="switchTab('today')">
+    <span class="tab-icon">☀️</span>
+    <span class="tab-label">Heute</span>
+  </button>
+  <button class="tab-btn" id="tab-evening" onclick="switchTab('evening')">
+    <span class="tab-icon">🌙</span>
+    <span class="tab-label">Abend</span>
+  </button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// SERVICE WORKER
+// ═══════════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+// ═══════════════════════════════════════════════════════
+// HAPTIC FEEDBACK
+// ═══════════════════════════════════════════════════════
+function haptic(style = 'light') {
+  if (window.navigator && window.navigator.vibrate) {
+    const ms = style === 'heavy' ? 30 : style === 'medium' ? 15 : 8;
+    window.navigator.vibrate(ms);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════
+function switchTab(tab) {
+  haptic();
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'evening') renderSummary();
+}
+
+// ═══════════════════════════════════════════════════════
+// OFFLINE
+// ═══════════════════════════════════════════════════════
+function updateOfflineStatus() {
+  const badge = document.getElementById('offline-badge');
+  if (!navigator.onLine) badge.classList.add('visible');
+  else badge.classList.remove('visible');
+}
+window.addEventListener('online', updateOfflineStatus);
+window.addEventListener('offline', updateOfflineStatus);
+updateOfflineStatus();
+
+// ═══════════════════════════════════════════════════════
+// GREETING
+// ═══════════════════════════════════════════════════════
+function updateGreeting() {
+  const h = new Date().getHours();
+  let text, emoji;
+  if (h < 10)  { text = "Good Morning, Maya"; emoji = "☀️"; }
+  else         { text = "Hello, Maya"; emoji = h < 18 ? "👋" : "🌙"; }
+  document.getElementById('greeting').innerHTML = `${text} <span class="sun">${emoji}</span>`;
+  const now = new Date();
+  const days = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+  const months = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  document.getElementById('date-line').textContent =
+    `📅 ${days[now.getDay()]}, ${now.getDate()}. ${months[now.getMonth()]} ${now.getFullYear()}`;
+  document.getElementById('last-update').textContent =
+    `🔄 Zuletzt: ${now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr`;
+}
+
+// ═══════════════════════════════════════════════════════
+// HOLIDAYS
+// ═══════════════════════════════════════════════════════
+function easterDate(y) {
+  const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451);
+  const mo=Math.floor((h+l-7*m+114)/31),dy=((h+l-7*m+114)%31)+1;
+  return new Date(y,mo-1,dy);
+}
+function addD(d,n){ return new Date(d.getTime()+n*86400000); }
+function getHolidays(year) {
+  const e = easterDate(year);
+  return [
+    {d:new Date(year,0,1),name:"Neujahr",emoji:"🎆",type:"🇩🇪 Deutsch"},
+    {d:new Date(year,0,6),name:"Heilige Drei Könige",emoji:"⭐",type:"🇩🇪 Deutsch"},
+    {d:new Date(year,2,8),name:"Internationaler Frauentag",emoji:"💜",type:"🇩🇪 Deutsch"},
+    {d:addD(e,-2),name:"Karfreitag",emoji:"✝️",type:"🇩🇪 Deutsch"},
+    {d:e,name:"Ostersonntag",emoji:"🐣",type:"🇩🇪 Deutsch"},
+    {d:addD(e,1),name:"Ostermontag",emoji:"🐰",type:"🇩🇪 Deutsch"},
+    {d:new Date(year,4,1),name:"Tag der Arbeit",emoji:"⚒️",type:"🇩🇪 Deutsch"},
+    {d:addD(e,39),name:"Christi Himmelfahrt",emoji:"⛪",type:"🇩🇪 Deutsch"},
+    {d:addD(e,49),name:"Pfingstsonntag",emoji:"🕊️",type:"🇩🇪 Deutsch"},
+    {d:addD(e,50),name:"Pfingstmontag",emoji:"🌿",type:"🇩🇪 Deutsch"},
+    {d:addD(e,60),name:"Fronleichnam",emoji:"🕯️",type:"🇩🇪 Deutsch"},
+    {d:new Date(year,7,15),name:"Mariä Himmelfahrt",emoji:"🌸",type:"🇩🇪 Deutsch"},
+    {d:new Date(year,9,3),name:"Tag der Deutschen Einheit",emoji:"🇩🇪",type:"🇩🇪 Deutsch"},
+    {d:new Date(year,9,31),name:"Reformationstag",emoji:"📖",type:"🇩🇪 Deutsch"},
+    {d:new Date(year,10,1),name:"Allerheiligen",emoji:"🕯️",type:"🇩🇪 Deutsch"},
+    {d:new Date(year,11,25),name:"1. Weihnachtstag",emoji:"🎄",type:"🇩🇪 Deutsch"},
+    {d:new Date(year,11,26),name:"2. Weihnachtstag",emoji:"🎁",type:"🇩🇪 Deutsch"},
+    {d:new Date(2025,2,13),name:"Purim",emoji:"🎭",type:"✡️ Jüdisch"},
+    {d:new Date(2025,3,12),name:"Pessach (Beginn)",emoji:"🫓",type:"✡️ Jüdisch"},
+    {d:new Date(2025,3,20),name:"Pessach (Ende)",emoji:"🫓",type:"✡️ Jüdisch"},
+    {d:new Date(2025,4,1),name:"Jom HaSchoah",emoji:"🕯️",type:"✡️ Jüdisch"},
+    {d:new Date(2025,5,1),name:"Schawuot",emoji:"📜",type:"✡️ Jüdisch"},
+    {d:new Date(2025,8,22),name:"Rosch Haschana",emoji:"🍎🍯",type:"✡️ Jüdisch"},
+    {d:new Date(2025,8,23),name:"Rosch Haschana (2. Tag)",emoji:"🍎",type:"✡️ Jüdisch"},
+    {d:new Date(2025,9,1),name:"Jom Kippur",emoji:"🤍",type:"✡️ Jüdisch"},
+    {d:new Date(2025,9,6),name:"Sukkot (Beginn)",emoji:"🌿",type:"✡️ Jüdisch"},
+    {d:new Date(2025,9,13),name:"Simchat Tora",emoji:"📜",type:"✡️ Jüdisch"},
+    {d:new Date(2025,11,14),name:"Chanukka (Beginn)",emoji:"🕎",type:"✡️ Jüdisch"},
+    {d:new Date(2025,11,22),name:"Chanukka (Ende)",emoji:"🕎",type:"✡️ Jüdisch"},
+    {d:new Date(2026,2,3),name:"Purim",emoji:"🎭",type:"✡️ Jüdisch"},
+    {d:new Date(2026,3,1),name:"Pessach (Beginn)",emoji:"🫓",type:"✡️ Jüdisch"},
+    {d:new Date(2026,3,9),name:"Pessach (Ende)",emoji:"🫓",type:"✡️ Jüdisch"},
+    {d:new Date(2026,4,20),name:"Schawuot",emoji:"📜",type:"✡️ Jüdisch"},
+    {d:new Date(2026,8,11),name:"Rosch Haschana",emoji:"🍎🍯",type:"✡️ Jüdisch"},
+    {d:new Date(2026,8,12),name:"Rosch Haschana (2. Tag)",emoji:"🍎",type:"✡️ Jüdisch"},
+    {d:new Date(2026,8,20),name:"Jom Kippur",emoji:"🤍",type:"✡️ Jüdisch"},
+    {d:new Date(2026,8,25),name:"Sukkot (Beginn)",emoji:"🌿",type:"✡️ Jüdisch"},
+    {d:new Date(2026,9,2),name:"Simchat Tora",emoji:"📜",type:"✡️ Jüdisch"},
+    {d:new Date(2026,11,4),name:"Chanukka (Beginn)",emoji:"🕎",type:"✡️ Jüdisch"},
+    {d:new Date(2026,11,11),name:"Chanukka (Ende)",emoji:"🕎",type:"✡️ Jüdisch"},
+  ];
+}
+function checkHoliday() {
+  const n=new Date(), key=d=>`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`, today=key(n);
+  return getHolidays(n.getFullYear()).find(h=>key(h.d)===today);
+}
+function renderHoliday() {
+  const h = checkHoliday();
+  document.getElementById('holiday-section').innerHTML = h ? `
+    <div class="card holiday-card">
+      <div class="card-title">🎉 Heutiger Feiertag</div>
+      <div class="holiday-emoji">${h.emoji}</div>
+      <div class="holiday-name">${h.name}</div>
+      <div class="holiday-type">${h.type}</div>
+    </div>` : '';
+}
+
+// ═══════════════════════════════════════════════════════
+// BIRTHDAY
+// ═══════════════════════════════════════════════════════
+function renderBirthday() {
+  const now=new Date();
+  let next=new Date(now.getFullYear(),6,28);
+  if(next<=now) next=new Date(now.getFullYear()+1,6,28);
+  const days=Math.ceil((next-now)/86400000);
+  let label,sub;
+  if(days===0){label="🥳 Alles Gute, Maya!";sub="Heute ist dein großer Tag! 🎂🎈🎊";}
+  else if(days===1){label="🎁 Morgen ist dein Geburtstag!";sub="Bist du aufgeregt? 😄";}
+  else if(days<=7){label="🎈 Nur noch wenige Tage!";sub="Dein 🎂-Tag naht…";}
+  else{label="Tage bis zu deinem 🎂";sub=`28. Juli · Noch ${days} Tage`;}
+  document.getElementById('birthday-section').innerHTML=`
+    <div class="card birthday-card">
+      <div class="card-title">🎂 Birthday Countdown</div>
+      <div class="birthday-top">
+        <div class="birthday-days">${days>1?days:'🎉'}</div>
+        <div class="birthday-right">
+          <div class="birthday-label">${label}</div>
+          <div class="birthday-sub">${sub}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// STEP COUNTER
+// ═══════════════════════════════════════════════════════
+const STEP_GOAL = 6000;
+const STEP_KEY = 'maya_steps_';
+const KCAL_PER_1000 = 25;       // kcal pro 1.000 Schritte über Ziel
+const KCAL_GYM  = 1700;         // Basis Gymday
+const KCAL_REST = 1500;         // Basis Ruhetag
+
+function todayKey() {
+  const n=new Date();
+  return `${n.getFullYear()}-${n.getMonth()}-${n.getDate()}`;
+}
+function getSteps() {
+  const saved = localStorage.getItem(STEP_KEY + todayKey());
+  return saved ? parseInt(saved) : 0;
+}
+function saveSteps(n) {
+  localStorage.setItem(STEP_KEY + todayKey(), n);
+}
+function extraCalories(steps) {
+  if(steps <= STEP_GOAL) return 0;
+  return Math.floor((steps - STEP_GOAL) / 1000) * KCAL_PER_1000;
+}
+
+function renderSteps() {
+  const steps = getSteps();
+  const pct = Math.min(steps / STEP_GOAL, 1);
+  const extra = extraCalories(steps);
+  const r = 34, circ = 2 * Math.PI * r;
+  const dash = pct * circ;
+  const color = pct >= 1 ? '#16a34a' : pct >= 0.6 ? '#22c55e' : '#86efac';
+
+  const totalGym  = KCAL_GYM  + extra;
+  const totalRest = KCAL_REST + extra;
+  const extraLine = extra > 0
+    ? `<div class="kcal-extra-row">
+         <span class="kcal-extra-label">+${KCAL_PER_1000} kcal/1k Schritte 🔥</span>
+         <span class="kcal-extra-val">+${extra}</span>
+       </div>`
+    : `<div class="kcal-extra-row">
+         <span class="kcal-extra-label" style="color:#9ca3af">Extra Schritte</span>
+         <span class="kcal-extra-val" style="color:#9ca3af">+0</span>
+       </div>`;
+
+  document.getElementById('steps-section').innerHTML = `
+    <div class="card steps-card">
+      <div class="card-title">👟 Schrittzähler · Tagesziel</div>
+      <div class="steps-ring-wrap">
+        <div class="steps-ring">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="${r}" fill="none" stroke="#dcfce7" stroke-width="7"/>
+            <circle cx="40" cy="40" r="${r}" fill="none" stroke="${color}" stroke-width="7"
+              stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}"
+              stroke-linecap="round" style="transition:stroke-dasharray 0.5s ease"/>
+          </svg>
+          <div class="steps-ring-center">
+            <span class="steps-ring-pct">${Math.round(pct*100)}%</span>
+            <span class="steps-ring-label">Ziel</span>
+          </div>
+        </div>
+        <div class="steps-info">
+          <div class="steps-count">${steps.toLocaleString('de-DE')}</div>
+          <div class="steps-goal">Ziel: ${STEP_GOAL.toLocaleString('de-DE')} Schritte</div>
+          ${extra > 0 ? `<div class="steps-extra">+${extra} kcal Extra 🔥</div>` : ''}
+          ${steps >= STEP_GOAL
+            ? `<div class="steps-extra">✅ Ziel erreicht!</div>`
+            : `<div class="steps-goal" style="color:#9ca3af">${(STEP_GOAL-steps).toLocaleString('de-DE')} noch</div>`}
+        </div>
+      </div>
+
+      <!-- Calorie panels -->
+      <div class="kcal-divider"></div>
+      <div class="kcal-panels">
+        <div class="kcal-panel gym">
+          <div class="kcal-panel-title">🏋️ Gymday</div>
+          <div class="kcal-row">
+            <span class="kcal-label">Basis</span>
+            <span class="kcal-val">${KCAL_GYM}</span>
+          </div>
+          ${extraLine}
+          <div class="kcal-total-row">
+            <span class="kcal-total-label">Gesamt</span>
+            <span class="kcal-total-val">${totalGym} kcal</span>
+          </div>
+        </div>
+        <div class="kcal-panel rest">
+          <div class="kcal-panel-title">🛋️ Restday</div>
+          <div class="kcal-row">
+            <span class="kcal-label">Basis</span>
+            <span class="kcal-val">${KCAL_REST}</span>
+          </div>
+          ${extraLine}
+          <div class="kcal-total-row">
+            <span class="kcal-total-label">Gesamt</span>
+            <span class="kcal-total-val">${totalRest} kcal</span>
+          </div>
+        </div>
+      </div>
+      <div class="kcal-note">+${KCAL_PER_1000} kcal pro 1.000 Schritte über ${STEP_GOAL.toLocaleString('de-DE')} hinaus</div>
+
+      <!-- Quick +/− buttons -->
+      <div class="steps-btn-row" style="margin-top:14px">
+        <button class="steps-btn minus" onclick="adjustSteps(-1000); haptic('medium')">−1.000</button>
+        <button class="steps-btn minus" onclick="adjustSteps(-500); haptic()">−500</button>
+        <button class="steps-btn" onclick="adjustSteps(500); haptic()">+500</button>
+        <button class="steps-btn" onclick="adjustSteps(1000); haptic('medium')">+1.000</button>
+      </div>
+
+      <!-- Manual input -->
+      <div class="steps-input-row">
+        <input
+          class="steps-input"
+          id="steps-manual-input"
+          type="number"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          placeholder="z.B. 8432"
+          min="0" max="99999"
+          onkeydown="if(event.key==='Enter'){setStepsManual();}"
+        />
+        <button class="steps-set-btn" onclick="setStepsManual(); haptic('medium')">✓ Setzen</button>
+      </div>
+      <div class="steps-hint">📱 Apple Watch → Aktivität → Schritte → hier eingeben</div>
+
+      <button class="steps-reset" onclick="if(confirm('Schritte zurücksetzen?')){saveSteps(0);haptic('heavy');renderSteps();}">↺ Zurücksetzen</button>
+    </div>`;
+}
+
+function adjustSteps(delta) {
+  const n = Math.max(0, getSteps() + delta);
+  saveSteps(n);
+  renderSteps();
+}
+
+function setStepsManual() {
+  const input = document.getElementById('steps-manual-input');
+  if (!input) return;
+  // Accept both comma and dot as thousands separator, strip non-digits
+  const raw = input.value.replace(/[^\d]/g, '');
+  const n = parseInt(raw, 10);
+  if (isNaN(n) || n < 0) return;
+  const clamped = Math.min(n, 99999);
+  saveSteps(clamped);
+  renderSteps();
+}
+
+// ═══════════════════════════════════════════════════════
+// WEATHER + UV + WEEKLY FORECAST
+// ═══════════════════════════════════════════════════════
+function wIcon(c){if(c===0)return'☀️';if(c<=2)return'⛅';if(c===3)return'☁️';if(c<=49)return'🌫️';if(c<=57)return'🌦️';if(c<=67)return'🌧️';if(c<=77)return'❄️';if(c<=82)return'🌦️';if(c<=86)return'🌨️';if(c<=99)return'⛈️';return'🌤️';}
+function wDesc(c){if(c===0)return'Strahlend klar';if(c<=2)return'Teils bewölkt';if(c===3)return'Bedeckt';if(c<=49)return'Nebelig';if(c<=57)return'Nieselregen';if(c<=67)return'Regnerisch';if(c<=77)return'Schneefall';if(c<=82)return'Regenschauer';if(c<=86)return'Schneeschauer';if(c<=99)return'Gewitter ⚡';return'–';}
+function uvLabel(uv){if(uv<=2)return{l:'Niedrig',c:'#30d158'};if(uv<=5)return{l:'Moderat',c:'#ffd60a'};if(uv<=7)return{l:'Hoch',c:'#ff9f0a'};if(uv<=10)return{l:'Sehr hoch',c:'#ff375f'};return{l:'Extrem',c:'#bf5af2'};}
+
+let _weatherCache = null; // for summary page
+
+async function loadWeather() {
+  try {
+    let lat=50.11, lon=8.68, city='Frankfurt';
+    try {
+      // Try ipwho.is first (no rate limit), fallback to ip-api.com
+      const geo = await fetch('https://ipwho.is/', {signal: AbortSignal.timeout(5000)}).then(r=>r.json());
+      if (geo.success !== false && geo.latitude) {
+        lat = geo.latitude; lon = geo.longitude; city = geo.city || city;
+      } else {
+        const geo2 = await fetch('http://ip-api.com/json/?fields=city,lat,lon', {signal: AbortSignal.timeout(5000)}).then(r=>r.json());
+        if (geo2.lat) { lat = geo2.lat; lon = geo2.lon; city = geo2.city || city; }
+      }
+    } catch {}
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
+      +`&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,precipitation,uv_index`
+      +`&hourly=precipitation,precipitation_probability,weather_code`
+      +`&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weather_code,uv_index_max`
+      +`&timezone=auto&forecast_days=7`;
+    const data=await fetch(url).then(r=>r.json());
+    const c=data.current, d=data.daily, h=data.hourly;
+    _weatherCache = {c, d, city};
+
+    const temp=Math.round(c.temperature_2m), feels=Math.round(c.apparent_temperature);
+    const humid=c.relative_humidity_2m, wind=Math.round(c.wind_speed_10m), code=c.weather_code;
+    const maxT=Math.round(d.temperature_2m_max[0]), minT=Math.round(d.temperature_2m_min[0]);
+    const precSum=d.precipitation_sum[0], precPro=d.precipitation_probability_max[0];
+    const uv=Math.round(c.uv_index||0), uvInfo=uvLabel(uv);
+    const uvPct=Math.min(uv/11,1)*100;
+
+    // Build hourly rain forecast for today (use local date, not UTC)
+    const nowLocal = new Date();
+    const nowHour = nowLocal.getHours();
+    const pad2 = n => String(n).padStart(2,'0');
+    const todayLocal = `${nowLocal.getFullYear()}-${pad2(nowLocal.getMonth()+1)}-${pad2(nowLocal.getDate())}`;
+    const rainTimes = [];
+    if (h && h.time) {
+      h.time.forEach((t, i) => {
+        // API returns local time strings like "2026-06-09T14:00" — match local date
+        if (!t.startsWith(todayLocal)) return;
+        const hr = parseInt(t.slice(11,13));
+        if (hr < nowHour) return; // only future hours
+        const mm = h.precipitation[i] || 0;
+        const prob = h.precipitation_probability ? h.precipitation_probability[i] : null;
+        if (mm > 0.05 || (prob && prob >= 30)) {
+          rainTimes.push({ hr, mm, prob });
+        }
+      });
+    }
+    // "No rain" only if BOTH daily sum is 0 AND daily probability < 30%
+    const definitelyNoRain = precSum <= 0 && precPro < 30;
+    let rainHtml = '';
+    if (rainTimes.length) {
+      const rows = rainTimes.slice(0,8).map(r =>
+        `<span class="rain-slot">
+          <span class="rain-time">${String(r.hr).padStart(2,'0')}:00 Uhr</span>
+          <span class="rain-mm">${r.mm>0.05?r.mm.toFixed(1)+' mm':'–'}</span>
+          ${r.prob!=null?`<span class="rain-prob">${r.prob}%</span>`:''}
+        </span>`
+      ).join('');
+      rainHtml = `<div class="rain-forecast"><div class="w-item-label" style="margin-bottom:7px">☔ Regenvorhersage heute</div><div class="rain-slots">${rows}</div></div>`;
+    } else if (precSum > 0 || precPro >= 30) {
+      rainHtml = `<div class="rain-forecast"><div class="w-item-label" style="margin-bottom:4px;color:#1d4ed8">☔ Regen erwartet: ${precSum>0?precSum.toFixed(1)+' mm · ':''}${precPro}% Wahrscheinlichkeit</div></div>`;
+    } else if (definitelyNoRain) {
+      rainHtml = `<div class="rain-forecast" style="background:#f0fff4;"><div class="w-item-label" style="margin-bottom:4px;color:#16a34a">🌵 Kein Regen heute erwartet</div></div>`;
+    }
+
+    document.getElementById('weather-section').innerHTML=`
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🌡️ Wetter · 📍 ${city}</div>
+          <button class="share-btn" onclick="shareCard('weather-section','🌡️','Wetter')">⎙ Teilen</button>
+        </div>
+        <div class="weather-top">
+          <div>
+            <div class="weather-temp-big">${temp}°</div>
+            <div class="weather-desc">${wDesc(code)}</div>
+            <div class="weather-feels">🌡️ Gefühlt ${feels}°</div>
+            <div class="weather-location">📍 ${city}</div>
+          </div>
+          <div class="weather-icon-big">${wIcon(code)}</div>
+        </div>
+        <div class="weather-grid">
+          <div class="w-item">
+            <div class="w-item-label">💧 Niederschlag</div>
+            <div class="w-item-val">${precSum>0?precSum.toFixed(1)+' mm':'Keiner 🌵'}</div>
+            <div class="w-item-sub">☔ ${precPro}% Wahrsch.</div>
+          </div>
+          <div class="w-item">
+            <div class="w-item-label">💨 Wind</div>
+            <div class="w-item-val">${wind} km/h</div>
+            <div class="w-item-sub">🌬️ Windgeschwindigkeit</div>
+          </div>
+          <div class="w-item">
+            <div class="w-item-label">🌊 Luftfeuchtigkeit</div>
+            <div class="w-item-val">${humid}%</div>
+          </div>
+          <div class="w-item">
+            <div class="w-item-label">🌡️ Aktuell / Gefühlt</div>
+            <div class="w-item-val">${temp}° / ${feels}°</div>
+          </div>
+        </div>
+        <div class="minmax-row">
+          <div class="mm-pill mm-min"><span>🥶 Minimum</span><strong>${minT}°</strong></div>
+          <div class="mm-pill mm-max"><span>🔥 Maximum</span><strong>${maxT}°</strong></div>
+        </div>
+        ${rainHtml}
+        <div class="uv-row">
+          <div class="uv-label-row">
+            <span>☀️ UV-Index: <strong style="color:${uvInfo.c}">${uv} — ${uvInfo.l}</strong></span>
+            <span style="font-size:11px;color:#aaa">0 ——— 11+</span>
+          </div>
+          <div class="uv-bar-bg">
+            <div class="uv-marker" style="left:${uvPct}%"></div>
+          </div>
+        </div>
+      </div>`;
+
+    // Weekly forecast with share button
+    const dayNames=['So','Mo','Di','Mi','Do','Fr','Sa'];
+    const weekHtml=d.time.map((dateStr,i)=>{
+      const dt=new Date(dateStr+'T12:00:00');
+      const isToday=i===0;
+      return `<div class="week-day${isToday?' today':''}">
+        <div class="week-day-name">${isToday?'Heute':dayNames[dt.getDay()]}</div>
+        <div class="week-day-icon">${wIcon(d.weather_code[i])}</div>
+        <div class="week-day-max">${Math.round(d.temperature_2m_max[i])}°</div>
+        <div class="week-day-min">${Math.round(d.temperature_2m_min[i])}°</div>
+      </div>`;
+    }).join('');
+    document.getElementById('week-section').innerHTML=`
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📅 7-Tage-Vorschau</div>
+          <button class="share-btn" onclick="shareWeek()">⎙ Teilen</button>
+        </div>
+        <div class="week-row">${weekHtml}</div>
+      </div>`;
+
+  } catch(e) {
+    document.getElementById('weather-section').innerHTML=
+      `<div class="card"><div class="card-title">🌤️ Wetter</div><p class="error-msg">📴 Nicht verfügbar</p></div>`;
+    document.getElementById('week-section').innerHTML='';
+  }
+}
+
+function shareWeek() {
+  haptic();
+  const items = document.querySelectorAll('#week-section .week-day');
+  if (!items.length) return;
+  let text = '📅 7-Tage-Wettervorschau:\n\n';
+  items.forEach(el => {
+    const name = el.querySelector('.week-day-name')?.textContent;
+    const icon = el.querySelector('.week-day-icon')?.textContent;
+    const max  = el.querySelector('.week-day-max')?.textContent;
+    const min  = el.querySelector('.week-day-min')?.textContent;
+    text += `${name}: ${icon} ${max} / ${min}\n`;
+  });
+  text += '\n— Maya\'s Morning Brief 🌅';
+  shareText(text, '7-Tage-Vorschau');
+}
+
+// ═══════════════════════════════════════════════════════
+// NEWS
+// ═══════════════════════════════════════════════════════
+
+// Fetch RSS via multiple CORS proxies, return parsed items array or null
+async function fetchRSS(feedUrl, count = 10) {
+  const proxies = [
+    url => `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}&count=${count}&api_key=&_=${Date.now()}`,
+    url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}&_=${Date.now()}`,
+    url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  ];
+
+  // Try rss2json first (returns JSON directly)
+  try {
+    const data = await fetch(proxies[0](feedUrl), {signal: AbortSignal.timeout(7000)}).then(r=>r.json());
+    if (data.items && data.items.length) return data.items.slice(0, count);
+  } catch {}
+
+  // Try raw XML via allorigins
+  try {
+    const res = await fetch(proxies[1](feedUrl), {signal: AbortSignal.timeout(7000)}).then(r=>r.json());
+    const xml = res.contents;
+    if (xml) return parseRSSXML(xml, count);
+  } catch {}
+
+  // Try corsproxy.io — raw XML
+  try {
+    const xml = await fetch(proxies[2](feedUrl), {signal: AbortSignal.timeout(7000)}).then(r=>r.text());
+    if (xml) return parseRSSXML(xml, count);
+  } catch {}
+
+  return null;
+}
+
+function parseRSSXML(xml, count = 10) {
+  try {
+    const doc = new DOMParser().parseFromString(xml, 'text/xml');
+    const items = Array.from(doc.querySelectorAll('item')).slice(0, count);
+    return items.map(el => ({
+      title: el.querySelector('title')?.textContent?.trim() || '',
+      pubDate: el.querySelector('pubDate')?.textContent || new Date().toISOString(),
+      link: el.querySelector('link')?.textContent || '',
+      description: el.querySelector('description')?.textContent || '',
+    })).filter(x => x.title);
+  } catch { return null; }
+}
+
+// Translate English text to German via MyMemory (free, no key needed)
+async function translateToDE(text) {
+  try {
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|de`;
+    const data = await fetch(url, {signal: AbortSignal.timeout(4000)}).then(r => r.json());
+    const t = data?.responseData?.translatedText;
+    if (t && t !== text && !t.toLowerCase().includes('please select')) return t;
+  } catch {}
+  return text; // fallback: original
+}
+
+async function fetchViaRss2json(feedUrl, src, count = 5) {
+  const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}&count=${count}&_=${Date.now()}`;
+  const data = await fetch(url, {signal: AbortSignal.timeout(10000)}).then(r => r.json());
+  if (data.status === 'ok' && data.items?.length) {
+    return data.items.map(i => ({ title: i.title, pubDate: i.pubDate, src }));
+  }
+  return null;
+}
+
+async function loadNews() {
+  const feeds = [
+    { url: 'https://www.n-tv.de/rss', src: 'n-tv.de' },
+    { url: 'https://feeds.tagesschau.de/feeds/tagesschau.xml', src: 'tagesschau.de' },
+    { url: 'https://www.spiegel.de/schlagzeilen/tops/index.rss', src: 'spiegel.de' },
+    { url: 'https://www.focus.de/nachrichtenueberblick/feed_rss.xml', src: 'focus.de' },
+  ];
+
+  for (const feed of feeds) {
+    try {
+      const items = await fetchViaRss2json(feed.url, feed.src, 5);
+      if (!items || !items.length) continue;
+      const html = items.map((item, i) => `
+        <div class="news-item">
+          <div class="news-num">${i+1}</div>
+          <div>
+            <div class="news-text">${item.title}</div>
+            <div class="news-source">📺 ${item.src} · 🕐 ${new Date(item.pubDate).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr</div>
+          </div>
+        </div>`).join('');
+      document.getElementById('news-section').innerHTML = `
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📰 Breaking News</div>
+            <button class="share-btn" onclick="shareCard('news-section','📰','Breaking News')">⎙ Teilen</button>
+          </div>
+          ${html}
+        </div>`;
+      return;
+    } catch { continue; }
+  }
+  document.getElementById('news-section').innerHTML = `<div class="card"><div class="card-title">📰 Breaking News</div><p class="error-msg">📴 Nicht verfügbar</p></div>`;
+}
+
+async function loadWarNews() {
+  // Prefer German feeds; English feeds will be translated
+  const feeds = [
+    { url: 'https://feeds.tagesschau.de/feeds/tagesschau.xml', src: 'tagesschau.de', lang: 'de' },
+    { url: 'https://www.n-tv.de/rss', src: 'n-tv.de', lang: 'de' },
+    { url: 'https://feeds.bbci.co.uk/news/world/rss.xml', src: 'bbc.com', lang: 'en' },
+    { url: 'https://rss.nytimes.com/services/xml/rss/nyt/World.xml', src: 'nytimes.com', lang: 'en' },
+    { url: 'http://rss.cnn.com/rss/edition_world.rss', src: 'cnn.com', lang: 'en' },
+  ];
+  const kw = [
+    'israel','iran','hamas','hezbollah','gaza','west bank','westjordanland',
+    'netanyahu','netanjahu','idf','irgc','tehran','teheran',
+    'nahost','middle east','war','krieg','conflict','konflikt',
+    'missile','rakete','strike','angriff','attack','ceasefire','waffenstillstand',
+    'hostage','geisel','nuclear','nuklear','sanctions','sanktionen',
+    'trump','pentagon','nato','ukraine','russland','russia','putin',
+    'airstrikes','luftangriff','us troops','us military'
+  ];
+
+  const allItems = [];
+
+  await Promise.allSettled(feeds.map(async feed => {
+    try {
+      const items = await fetchViaRss2json(feed.url, feed.src, 15);
+      if (!items) return;
+      const matched = items
+        .filter(x => kw.some(k => (x.title + ' ' + (x.description||'')).toLowerCase().includes(k)))
+        .slice(0, 3)
+        .map(x => ({ ...x, _src: feed.src, _lang: feed.lang }));
+      if (!matched.length && (feed.src === 'tagesschau.de' || feed.src === 'n-tv.de')) {
+        allItems.push(...items.slice(0,2).map(x => ({ ...x, _src: feed.src, _lang: feed.lang })));
+      } else {
+        allItems.push(...matched);
+      }
+    } catch {}
+  }));
+
+  allItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+  const seen = new Set();
+  const deduped = allItems.filter(x => {
+    const key = x.title.slice(0, 40).toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, 5);
+
+  if (!deduped.length) {
+    document.getElementById('war-section').innerHTML =
+      `<div class="card war-card"><div class="card-title">🔴 Israel · 🇺🇸 USA · 🇮🇷 Iran</div><p class="error-msg">📴 Keine Meldungen verfügbar</p></div>`;
+    return;
+  }
+
+  // Translate English headlines to German
+  const translated = await Promise.all(deduped.map(async item => ({
+    ...item,
+    title: item._lang === 'en' ? await translateToDE(item.title) : item.title
+  })));
+
+  const html = translated.map((item, i) => `
+    <div class="news-item">
+      <div class="news-num">${i+1}</div>
+      <div>
+        <div class="news-text">${item.title}</div>
+        <div class="news-source">📡 ${item._src} · 🕐 ${new Date(item.pubDate).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('war-section').innerHTML = `
+    <div class="card war-card">
+      <div class="card-header">
+        <div class="card-title"><span class="live-dot"></span>Israel · 🇺🇸 USA · 🇮🇷 Iran</div>
+        <button class="share-btn" onclick="shareCard('war-section','🔴','Israel · USA · Iran')">⎙ Teilen</button>
+      </div>
+      ${html}
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// WORD OF THE DAY
+// ═══════════════════════════════════════════════════════
+const words = [
+  {w:"Serendipity",ph:"/ˌserənˈdipəti/",pos:"noun",def:"The occurrence of pleasant surprises by chance.",ex:'"Finding that café was pure serendipity."',de:"Glücklicher Zufall · eine angenehme Überraschung, die man zufällig macht"},
+  {w:"Ephemeral",ph:"/ɪˈfemərəl/",pos:"adjective",def:"Lasting for a very short time.",ex:'"The cherry blossoms are ephemeral but breathtaking."',de:"Vergänglich, kurzlebig"},
+  {w:"Resilience",ph:"/rɪˈzɪliəns/",pos:"noun",def:"The ability to recover quickly from difficulties.",ex:'"Her resilience in the face of adversity was admirable."',de:"Resilienz · die Fähigkeit, sich von Schwierigkeiten zu erholen"},
+  {w:"Tenacious",ph:"/tɪˈneɪʃəs/",pos:"adjective",def:"Holding firmly to a purpose; persistent and determined.",ex:'"She was tenacious in pursuing her goals."',de:"Hartnäckig, zielstrebig, beharrlich"},
+  {w:"Luminous",ph:"/ˈluːmɪnəs/",pos:"adjective",def:"Full of light; bright and glowing.",ex:'"The luminous moon lit up the night sky."',de:"Leuchtend, strahlend"},
+  {w:"Persevere",ph:"/ˌpɜːrsɪˈvɪər/",pos:"verb",def:"To continue doing something despite difficulty.",ex:'"She persevered through every challenge."',de:"Durchhalten, beharren, nicht aufgeben"},
+  {w:"Audacious",ph:"/ɔːˈdeɪʃəs/",pos:"adjective",def:"Showing a willingness to take surprisingly bold risks.",ex:'"It was an audacious plan — but it worked."',de:"Kühn, wagemutig, mutig"},
+  {w:"Momentum",ph:"/məˈmentəm/",pos:"noun",def:"The force that keeps something moving or growing stronger.",ex:'"Once she started, she built incredible momentum."',de:"Schwung, Dynamik, Antrieb"},
+  {w:"Eloquent",ph:"/ˈeləkwənt/",pos:"adjective",def:"Fluent and persuasive in speaking or writing.",ex:'"Her eloquent speech moved the entire audience."',de:"Beredt, ausdrucksstark, eloquent"},
+  {w:"Flourish",ph:"/ˈflʌrɪʃ/",pos:"verb",def:"To grow or develop in a healthy and vigorous way.",ex:'"She flourished in her new environment."',de:"Gedeihen, aufblühen, florieren"},
+  {w:"Deliberate",ph:"/dɪˈlɪbərət/",pos:"adjective",def:"Done consciously and intentionally.",ex:'"Every step she took was deliberate and confident."',de:"Bewusst, absichtlich, überlegt"},
+  {w:"Vitality",ph:"/vaɪˈtælɪti/",pos:"noun",def:"The state of being strong, active, and energetic.",ex:'"She radiated vitality and confidence."',de:"Vitalität, Lebenskraft, Energie"},
+  {w:"Empower",ph:"/ɪmˈpaʊər/",pos:"verb",def:"To give someone the power or authority to do something.",ex:'"Good habits empower you to take control of your life."',de:"Ermächtigen, stärken, befähigen"},
+  {w:"Innate",ph:"/ɪˈneɪt/",pos:"adjective",def:"Existing from birth; natural, not learned.",ex:'"She had an innate talent for connecting with people."',de:"Angeboren, natürlich, von Natur aus"},
+  {w:"Catalyst",ph:"/ˈkætəlɪst/",pos:"noun",def:"Something that causes an important change or event.",ex:'"That conversation was the catalyst for her transformation."',de:"Katalysator · etwas, das eine wichtige Veränderung auslöst"},
+  {w:"Zenith",ph:"/ˈziːnɪθ/",pos:"noun",def:"The highest point reached; the peak.",ex:'"She was at the zenith of her career."',de:"Zenit, Höhepunkt, Gipfel"},
+  {w:"Tenacity",ph:"/tɪˈnæsɪti/",pos:"noun",def:"The quality of being very determined and not giving up.",ex:'"Her tenacity got her through the hardest moments."',de:"Hartnäckigkeit, Ausdauer, Zähigkeit"},
+  {w:"Articulate",ph:"/ɑːˈtɪkjʊlət/",pos:"adjective",def:"Having the ability to speak clearly and effectively.",ex:'"She was articulate and confident in every meeting."',de:"Ausdrucksstark, klar formulierend"},
+  {w:"Diligent",ph:"/ˈdɪlɪdʒənt/",pos:"adjective",def:"Having or showing care and effort in work.",ex:'"She was diligent in everything she set her mind to."',de:"Fleißig, sorgfältig, gewissenhaft"},
+  {w:"Sovereign",ph:"/ˈsɒvrɪn/",pos:"adjective",def:"Possessing supreme or ultimate power.",ex:'"She walked in with sovereign confidence."',de:"Souverän, oberste Macht habend"},
+  {w:"Fervent",ph:"/ˈfɜːrvənt/",pos:"adjective",def:"Having or displaying passionate intensity.",ex:'"She had a fervent belief in her own potential."',de:"Leidenschaftlich, glühend, inbrünstig"},
+  {w:"Quintessential",ph:"/ˌkwɪntɪˈsenʃəl/",pos:"adjective",def:"Representing the most perfect or typical example.",ex:'"She was the quintessential self-made woman."',de:"Inbegriff von, exemplarisch, typischste Ausprägung"},
+  {w:"Meticulous",ph:"/mɪˈtɪkjʊləs/",pos:"adjective",def:"Showing great attention to detail; very careful.",ex:'"Her meticulous preparation always showed in results."',de:"Akribisch, gewissenhaft, sorgfältig"},
+  {w:"Indefatigable",ph:"/ˌɪndɪˈfætɪɡəbl/",pos:"adjective",def:"Never tiring; persisting without getting exhausted.",ex:'"Her indefatigable spirit inspired everyone around her."',de:"Unermüdlich, unerschöpflich"},
+  {w:"Perspicacious",ph:"/ˌpɜːrspɪˈkeɪʃəs/",pos:"adjective",def:"Having a ready insight into and understanding of things.",ex:'"Her perspicacious mind saw what others missed."',de:"Scharfsinnig, klug, einsichtsvoll"},
+  {w:"Fortitude",ph:"/ˈfɔːrtɪtjuːd/",pos:"noun",def:"Courage in the face of pain or adversity.",ex:'"She faced every setback with fortitude."',de:"Standhaftigkeit, innere Stärke, Mut"},
+  {w:"Aplomb",ph:"/əˈplɒm/",pos:"noun",def:"Self-confidence and composure, especially in difficult situations.",ex:'"She handled the crisis with total aplomb."',de:"Gelassenheit, Selbstsicherheit, Fassung"},
+  {w:"Voracious",ph:"/vəˈreɪʃəs/",pos:"adjective",def:"Wanting or devouring great quantities; extremely eager.",ex:'"She was a voracious reader and learner."',de:"Unersättlich, gierig, begierig"},
+  {w:"Sanguine",ph:"/ˈsæŋɡwɪn/",pos:"adjective",def:"Optimistic, especially in a difficult situation.",ex:'"She remained sanguine about the outcome."',de:"Optimistisch, zuversichtlich, heiter"},
+  {w:"Sagacious",ph:"/səˈɡeɪʃəs/",pos:"adjective",def:"Having or showing keen mental discernment and good judgement.",ex:'"Her sagacious advice changed everything."',de:"Weise, klug, scharfsinnig"},
+  {w:"Intrepid",ph:"/ɪnˈtrepɪd/",pos:"adjective",def:"Fearless; adventurous.",ex:'"She was an intrepid explorer of new ideas."',de:"Unerschrocken, furchtlos, mutig"},
+];
+
+function renderWord() {
+  const now=new Date();
+  const doy=Math.floor((now-new Date(now.getFullYear(),0,0))/86400000);
+  const w=words[doy%words.length];
+  document.getElementById('word-section').innerHTML=`
+    <div class="card word-card">
+      <div class="card-header">
+        <div class="card-title">📖 Word of the Day</div>
+        <button class="share-btn" onclick="shareCard('word-section','📖','Word of the Day')">⎙ Teilen</button>
+      </div>
+      <div class="word-main">${w.w}</div>
+      <div class="word-phonetic">${w.ph}</div>
+      <div class="word-pos">${w.pos}</div>
+      <div class="word-def">${w.def}</div>
+      <div class="word-example">${w.ex}</div>
+      <div class="word-de">🇩🇪 ${w.de}</div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// THIS DAY IN HISTORY
+// ═══════════════════════════════════════════════════════
+const history = {
+  "1-1":[{y:1863,t:"Abraham Lincoln signs the Emancipation Proclamation, freeing enslaved people in Confederate states."},{y:1993,t:"Czechoslovakia peacefully splits into the Czech Republic and Slovakia — the 'Velvet Divorce'."}],
+  "1-6":[{y:1412,t:"Joan of Arc is born in Domrémy, France."},{y:1941,t:"FDR delivers his famous 'Four Freedoms' speech to Congress."}],
+  "1-15":[{y:1929,t:"Martin Luther King Jr. is born in Atlanta, Georgia."},{y:2009,t:"Captain Sully Sullenberger lands a US Airways plane safely on the Hudson River."}],
+  "1-27":[{y:1945,t:"Soviet troops liberate the Auschwitz concentration camp."}],
+  "2-14":[{y:1929,t:"The St. Valentine's Day Massacre in Chicago."},{y:1990,t:"Voyager 1 takes the iconic 'Pale Blue Dot' photograph of Earth."}],
+  "3-8":[{y:1917,t:"The Russian Revolution begins with a women's march in Petrograd."}],
+  "3-14":[{y:1879,t:"Albert Einstein is born in Ulm, Germany."}],
+  "4-15":[{y:1912,t:"The RMS Titanic sinks in the North Atlantic after hitting an iceberg."}],
+  "4-23":[{y:1616,t:"William Shakespeare dies on his 52nd birthday."},{y:1985,t:"Coca-Cola launches 'New Coke' — one of history's biggest marketing failures."}],
+  "5-8":[{y:1945,t:"Victory in Europe Day — Nazi Germany surrenders, ending World War II in Europe."}],
+  "5-9":[{y:1950,t:"Robert Schuman proposes the European Coal and Steel Community — the seed of the EU."}],
+  "6-6":[{y:1944,t:"D-Day: Allied forces land on the beaches of Normandy in the largest seaborne invasion in history."}],
+  "6-9":[{y:1934,t:"Donald Duck makes his first appearance in the cartoon 'The Wise Little Hen'."},{y:1870,t:"Charles Dickens, author of Oliver Twist and A Christmas Carol, dies at age 58."}],
+  "7-4":[{y:1776,t:"The United States Declaration of Independence is adopted."}],
+  "7-20":[{y:1969,t:"Neil Armstrong becomes the first human to walk on the Moon."}],
+  "7-28":[{y:1914,t:"Austria-Hungary declares war on Serbia, triggering World War I."},{y:1750,t:"Johann Sebastian Bach, one of the greatest composers in history, dies in Leipzig."}],
+  "8-6":[{y:1945,t:"The United States drops an atomic bomb on Hiroshima, Japan."}],
+  "8-28":[{y:1963,t:"Martin Luther King Jr. delivers his 'I Have a Dream' speech at the March on Washington."}],
+  "9-11":[{y:2001,t:"Terrorist attacks on the World Trade Center and Pentagon kill nearly 3,000 people."}],
+  "10-3":[{y:1990,t:"East and West Germany are officially reunified after 45 years of division."}],
+  "10-31":[{y:1517,t:"Martin Luther nails his 95 Theses to a church door in Wittenberg, sparking the Reformation."}],
+  "11-9":[{y:1989,t:"The Berlin Wall falls — East Germans flood through checkpoints as communism collapses."}],
+  "11-10":[{y:1938,t:"Kristallnacht: Nazi Germany carries out a coordinated pogrom against Jewish communities."}],
+  "12-25":[{y:800,t:"Charlemagne is crowned Emperor of the Romans by Pope Leo III."},{y:1991,t:"Mikhail Gorbachev resigns as president of the Soviet Union, ending the USSR."}],
+  "12-31":[{y:1999,t:"The world celebrates the turn of the millennium. Y2K fears largely don't materialize."}],
+};
+
+function renderHistory() {
+  const now=new Date();
+  const key=`${now.getMonth()+1}-${now.getDate()}`;
+  const entries=history[key];
+  const el=document.getElementById('history-section');
+  if(!entries||!entries.length){el.innerHTML='';return;}
+  const entry=entries[Math.floor(Math.random()*entries.length)];
+  const ago=now.getFullYear()-entry.y;
+  el.innerHTML=`
+    <div class="card history-card">
+      <div class="card-header">
+        <div class="card-title">🏛️ This Day in History</div>
+        <button class="share-btn" onclick="shareCard('history-section','🏛️','This Day in History')">⎙ Teilen</button>
+      </div>
+      <div class="history-year">${entry.y}</div>
+      <div class="history-text">${entry.t}</div>
+      <div class="history-ago">📆 Vor ${ago} Jahren — heute, ${now.getDate()}. ${['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][now.getMonth()]}</div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// MOTIVATION
+// ═══════════════════════════════════════════════════════
+const quotes=[
+  {t:"You are stronger than you think.",de:"Du bist stärker als du denkst.",a:"",e:"💪"},
+  {t:"Every day is a new beginning.",de:"Jeder Tag ist ein neuer Anfang.",a:"",e:"🌅"},
+  {t:"Start where you are. Use what you have. Do what you can.",de:"Fang an, wo du bist. Nutze, was du hast. Tu, was du kannst.",a:"Arthur Ashe",e:"🚀"},
+  {t:"The only way to do great work is to love what you do.",de:"Der einzige Weg, großartige Arbeit zu leisten, ist zu lieben, was du tust.",a:"Steve Jobs",e:"❤️"},
+  {t:"Believe you can and you're halfway there.",de:"Glaube daran, dass du es kannst — und du bist schon auf halbem Weg.",a:"Theodore Roosevelt",e:"✨"},
+  {t:"Small progress is still progress.",de:"Kleine Fortschritte sind immer noch Fortschritte.",a:"",e:"🐢"},
+  {t:"Whatever you do, do it with passion.",de:"Was auch immer du tust, tu es mit Leidenschaft.",a:"",e:"🔥"},
+  {t:"Dream big. Work hard. Stay humble.",de:"Träume groß. Arbeite hart. Bleib demütig.",a:"",e:"🌟"},
+  {t:"You have the power to turn obstacles into opportunities.",de:"Du hast die Kraft, Hindernisse in Chancen zu verwandeln.",a:"",e:"⚡"},
+  {t:"Today is a great day for a great day.",de:"Heute ist ein großartiger Tag für einen großartigen Tag.",a:"",e:"☀️"},
+  {t:"Success is the sum of small efforts repeated day in and day out.",de:"Erfolg ist die Summe kleiner Bemühungen, täglich wiederholt.",a:"Robert Collier",e:"🏆"},
+  {t:"The best time to start was yesterday. The next best time is now.",de:"Die beste Zeit, anzufangen, war gestern. Die nächstbeste ist jetzt.",a:"",e:"⏰"},
+  {t:"Not giving up is your greatest talent.",de:"Nicht aufgeben ist dein größtes Talent.",a:"",e:"🦁"},
+  {t:"You are the hero of your own story.",de:"Du bist die Heldin deiner eigenen Geschichte.",a:"",e:"👑"},
+  {t:"Every workout, every healthy meal is an act of self-love.",de:"Jede Übung, jede gesunde Mahlzeit ist ein Akt der Selbstliebe.",a:"",e:"🥗"},
+  {t:"The body achieves what the mind believes.",de:"Der Körper erreicht, was der Geist glaubt.",a:"",e:"🧠"},
+  {t:"You were not born to be average.",de:"Du wurdest nicht geboren, um Durchschnitt zu sein.",a:"",e:"🦋"},
+  {t:"Be the version of yourself you are proud of.",de:"Sei die Version von dir, auf die du stolz bist.",a:"",e:"🪞"},
+  {t:"It's not about being the best. It's about being better than yesterday.",de:"Es geht nicht um den Besten zu sein — sondern besser als gestern.",a:"",e:"📊"},
+  {t:"Do today what you will thank yourself for tomorrow.",de:"Mach heute das, wofür du dich morgen bei dir bedankst.",a:"",e:"🙏"},
+  {t:"A strong body starts in the mind.",de:"Ein starker Körper fängt im Kopf an.",a:"",e:"🏋️"},
+  {t:"Progress, not perfection.",de:"Fortschritt, nicht Perfektion.",a:"",e:"🎯"},
+  {t:"You can't control everything — but you can control your reaction.",de:"Du kannst nicht alles kontrollieren — aber deine Reaktion schon.",a:"",e:"🧘"},
+  {t:"Smile. It confuses people.",de:"Lächle. Es verwirrt die Leute.",a:"",e:"😄"},
+  {t:"Sometimes courage is just holding on one day longer.",de:"Manchmal ist Mut einfach: einen Tag länger durchhalten.",a:"",e:"🌊"},
+  {t:"You didn't come this far to only come this far.",de:"Du bist nicht so weit gekommen, um nur so weit zu kommen.",a:"",e:"🏁"},
+  {t:"The secret of getting ahead is getting started.",de:"Das Geheimnis des Vorwärtskommens ist, anzufangen.",a:"Mark Twain",e:"🌱"},
+  {t:"Your energy is your greatest asset.",de:"Deine Energie ist dein größtes Kapital.",a:"",e:"⚡"},
+  {t:"Life is too short to put on pause.",de:"Das Leben ist zu kurz, um es auf Pause zu stellen.",a:"",e:"▶️"},
+  {t:"Strength comes from overcoming what you once thought you couldn't.",de:"Stärke kommt aus dem Überwinden dessen, was du für unmöglich hieltest.",a:"Rikki Rogers",e:"💎"},
+  {t:"Believe in yourself even when no one else does.",de:"Glaube an dich selbst, auch wenn es niemand anderes tut.",a:"",e:"🌙"},
+];
+
+function renderMotivation() {
+  const now=new Date();
+  const doy=Math.floor((now-new Date(now.getFullYear(),0,0))/86400000);
+  const q=quotes[doy%quotes.length];
+  document.getElementById('motivation-section').innerHTML=`
+    <div class="card motivation-card">
+      <div class="card-header">
+        <div class="card-title">💙 Quote of the Day</div>
+        <button class="share-btn" onclick="shareCard('motivation-section','💙','Quote of the Day')">⎙ Teilen</button>
+      </div>
+      <div class="motivation-emoji">${q.e}</div>
+      <div class="motivation-quote">"${q.t}"</div>
+      <div class="motivation-translation">„${q.de}"</div>
+      ${q.a?`<div class="motivation-author">— ${q.a}</div>`:''}
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// EVENING SUMMARY (available after 20:00)
+// ═══════════════════════════════════════════════════════
+function renderSummary() {
+  const now=new Date();
+  const h=now.getHours();
+  const days=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+  const months=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  document.getElementById('summary-date').textContent=
+    `${days[now.getDay()]}, ${now.getDate()}. ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+  if(h < 20) {
+    document.getElementById('summary-content').innerHTML=`
+      <div class="evening-locked">
+        <div class="evening-locked-icon">🔒</div>
+        <div class="evening-locked-time">Ab 20:00 Uhr</div>
+        <div class="evening-locked-text">Die Tageszusammenfassung wird jeden Abend ab 20:00 Uhr freigeschaltet.</div>
+      </div>`;
+    return;
+  }
+
+  // Weather recap
+  let weatherHtml='<p class="summary-unavail">Wetterdaten nicht geladen</p>';
+  if(_weatherCache) {
+    const {c,d}=_weatherCache;
+    weatherHtml=`
+      <div class="weather-recap-row">
+        <div class="wr-item"><span>🌡️ Max</span><strong>${Math.round(d.temperature_2m_max[0])}°</strong></div>
+        <div class="wr-item"><span>🥶 Min</span><strong>${Math.round(d.temperature_2m_min[0])}°</strong></div>
+        <div class="wr-item"><span>${wIcon(c.weather_code)}</span><strong>${wDesc(c.weather_code)}</strong></div>
+        <div class="wr-item"><span>💧 Regen</span><strong>${d.precipitation_sum[0]>0?d.precipitation_sum[0].toFixed(1)+'mm':'Kein'}</strong></div>
+      </div>`;
+  }
+
+  // Steps recap
+  const steps=getSteps();
+  const extra=extraCalories(steps);
+  const stepsHtml=`
+    <div class="steps-recap">
+      <div class="steps-recap-num">${steps.toLocaleString('de-DE')}</div>
+      <div class="steps-recap-info">
+        <span>Tagesziel: ${STEP_GOAL.toLocaleString('de-DE')}</span>
+        <strong>${steps>=STEP_GOAL?'✅ Ziel erreicht!':'Ziel nicht erreicht'}</strong>
+        ${extra>0?`<span style="color:#059669">+${extra} kcal Extra 🔥</span>`:''}
+      </div>
+    </div>`;
+
+  // News recap (last loaded)
+  const newsItems=document.getElementById('news-section').querySelectorAll('.news-text');
+  const newsHtml=newsItems.length ? Array.from(newsItems).map((el,i)=>`
+    <div class="recap-item">
+      <div class="recap-num">${i+1}</div>
+      <div class="recap-text">${el.textContent}</div>
+    </div>`).join('') : '<p class="summary-unavail">Keine News geladen</p>';
+
+  // Motivation recap
+  const motEl=document.getElementById('motivation-section').querySelector('.motivation-quote');
+  const motText=motEl?motEl.textContent:'"–"';
+
+  document.getElementById('summary-content').innerHTML=`
+    <div class="summary-card" style="animation-delay:0.05s">
+      <div class="summary-card-title">🌡️ Wetter heute</div>
+      ${weatherHtml}
+    </div>
+    <div class="summary-card" style="animation-delay:0.1s">
+      <div class="summary-card-title">👟 Schritte heute</div>
+      ${stepsHtml}
+    </div>
+    <div class="summary-card" style="animation-delay:0.15s">
+      <div class="summary-card-title">📰 Top News des Tages</div>
+      ${newsHtml}
+    </div>
+    <div class="summary-card motivation-card" style="animation-delay:0.2s">
+      <div class="summary-card-title">💙 Quote of the Day</div>
+      <div class="motivation-quote">${motText}</div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// SHARE
+// ═══════════════════════════════════════════════════════
+function shareText(text, title) {
+  haptic('medium');
+  // Show custom share sheet with Instagram + TikTok options
+  showShareSheet(text, title);
+}
+
+function showShareSheet(text, title) {
+  // Remove existing sheet
+  const existing = document.getElementById('custom-share-sheet');
+  if (existing) existing.remove();
+
+  const sheet = document.createElement('div');
+  sheet.id = 'custom-share-sheet';
+  sheet.style.cssText = `
+    position:fixed; inset:0; z-index:9999;
+    display:flex; flex-direction:column; justify-content:flex-end;
+    background:rgba(0,0,0,0.4);
+  `;
+
+  sheet.innerHTML = `
+    <div style="background:#fff; border-radius:20px 20px 0 0; padding:16px 16px calc(16px + env(safe-area-inset-bottom)); max-height:70vh; overflow-y:auto;">
+      <div style="width:36px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 16px;"></div>
+      <div style="font-size:13px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px;text-align:center;">Teilen via</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">
+        <button onclick="shareViaInstagram()" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);display:flex;align-items:center;justify-content:center;font-size:26px;">📸</div>
+          <span style="font-size:11px;color:#333;font-weight:500;">Instagram</span>
+        </button>
+        <button onclick="shareViaTikTok()" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <div style="width:52px;height:52px;border-radius:14px;background:#000;display:flex;align-items:center;justify-content:center;font-size:26px;">🎵</div>
+          <span style="font-size:11px;color:#333;font-weight:500;">TikTok</span>
+        </button>
+        <button onclick="shareViaWhatsApp('${encodeURIComponent(text)}')" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <div style="width:52px;height:52px;border-radius:14px;background:#25d366;display:flex;align-items:center;justify-content:center;font-size:26px;">💬</div>
+          <span style="font-size:11px;color:#333;font-weight:500;">WhatsApp</span>
+        </button>
+        <button onclick="shareViaNative('${encodeURIComponent(text)}','${encodeURIComponent(title||'')}')" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <div style="width:52px;height:52px;border-radius:14px;background:#007aff;display:flex;align-items:center;justify-content:center;font-size:26px;">📤</div>
+          <span style="font-size:11px;color:#333;font-weight:500;">Mehr</span>
+        </button>
+      </div>
+      <button onclick="copyAndClose('${encodeURIComponent(text)}')" style="width:100%;background:#f2f2f7;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:600;color:#007aff;cursor:pointer;margin-bottom:8px;">📋 Text kopieren</button>
+      <button onclick="document.getElementById('custom-share-sheet').remove()" style="width:100%;background:#f2f2f7;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:600;color:#333;cursor:pointer;">Abbrechen</button>
+    </div>`;
+
+  // Store text for use in sub-functions
+  sheet._shareText = text;
+  sheet._shareTitle = title;
+  document.body.appendChild(sheet);
+  sheet.addEventListener('click', e => { if (e.target === sheet) sheet.remove(); });
+}
+
+function shareViaInstagram() {
+  const sheet = document.getElementById('custom-share-sheet');
+  const text = sheet?._shareText || '';
+  // Copy text to clipboard then open Instagram
+  navigator.clipboard.writeText(text).then(() => {
+    sheet?.remove();
+    setTimeout(() => {
+      window.location.href = 'instagram://';
+      setTimeout(() => { alert('📋 Text wurde kopiert!\n\nInstagram öffnen → Story erstellen → Text einfügen'); }, 1000);
+    }, 100);
+  }).catch(() => {
+    sheet?.remove();
+    window.location.href = 'instagram://';
+  });
+}
+
+function shareViaTikTok() {
+  const sheet = document.getElementById('custom-share-sheet');
+  const text = sheet?._shareText || '';
+  navigator.clipboard.writeText(text).then(() => {
+    sheet?.remove();
+    setTimeout(() => {
+      window.location.href = 'tiktok://';
+      setTimeout(() => { alert('📋 Text wurde kopiert!\n\nTikTok öffnen → Video erstellen → Text einfügen'); }, 1000);
+    }, 100);
+  }).catch(() => {
+    sheet?.remove();
+    window.location.href = 'tiktok://';
+  });
+}
+
+function shareViaWhatsApp(encodedText) {
+  document.getElementById('custom-share-sheet')?.remove();
+  window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+}
+
+function shareViaNative(encodedText, encodedTitle) {
+  document.getElementById('custom-share-sheet')?.remove();
+  const text = decodeURIComponent(encodedText);
+  const title = decodeURIComponent(encodedTitle);
+  if (navigator.share) {
+    navigator.share({ title, text });
+  } else {
+    navigator.clipboard.writeText(text).then(() => alert('📋 In Zwischenablage kopiert!'));
+  }
+}
+
+function copyAndClose(encodedText) {
+  const text = decodeURIComponent(encodedText);
+  navigator.clipboard.writeText(text).then(() => {
+    document.getElementById('custom-share-sheet')?.remove();
+    // Brief confirmation toast
+    const toast = document.createElement('div');
+    toast.textContent = '✅ Kopiert!';
+    toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;font-weight:600;z-index:9999;';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 1800);
+  });
+}
+
+function shareAll() {
+  const now = new Date();
+  const days = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+  const months = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  const dateStr = `${days[now.getDay()]}, ${now.getDate()}. ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+  let text = `✨ Maya's Morning Brief — ${dateStr}\n\n`;
+
+  // Weather
+  const wDesc = document.querySelector('#weather-section .weather-desc');
+  const wTemp = document.querySelector('#weather-section .weather-temp-big');
+  if (wDesc && wTemp) text += `🌡️ Wetter: ${wTemp.textContent} — ${wDesc.textContent}\n\n`;
+
+  // News
+  const newsItems = document.querySelectorAll('#news-section .news-text');
+  if (newsItems.length) {
+    text += `📰 Breaking News:\n`;
+    newsItems.forEach((el, i) => { text += `${i+1}. ${el.textContent}\n`; });
+    text += '\n';
+  }
+
+  // War
+  const warItems = document.querySelectorAll('#war-section .news-text');
+  if (warItems.length) {
+    text += `🔴 Israel · USA · Iran:\n`;
+    warItems.forEach((el, i) => { text += `${i+1}. ${el.textContent}\n`; });
+    text += '\n';
+  }
+
+  // Quote
+  const quote = document.querySelector('#motivation-section .motivation-quote');
+  const trans = document.querySelector('#motivation-section .motivation-translation');
+  if (quote) text += `💙 Quote of the Day:\n${quote.textContent}\n${trans ? trans.textContent : ''}\n\n`;
+
+  // History
+  const hist = document.querySelector('#history-section .history-text');
+  const histY = document.querySelector('#history-section .history-year');
+  if (hist) text += `🏛️ This Day in History (${histY?.textContent}):\n${hist.textContent}\n\n`;
+
+  // Word
+  const word = document.querySelector('#word-section .word-main');
+  const wordDef = document.querySelector('#word-section .word-def');
+  if (word) text += `📖 Word of the Day: ${word.textContent} — ${wordDef?.textContent}\n\n`;
+
+  text += `— Gesendet von Maya's Morning Brief 🌅`;
+  shareText(text, `Maya's Morning Brief — ${dateStr}`);
+}
+
+function shareCard(cardId, emoji, title) {
+  haptic();
+  let text = `${emoji} ${title}\n`;
+  const card = document.getElementById(cardId);
+  if (!card) return;
+
+  if (cardId === 'news-section') {
+    card.querySelectorAll('.news-item').forEach((el, i) => {
+      const t = el.querySelector('.news-text')?.textContent;
+      const s = el.querySelector('.news-source')?.textContent;
+      if (t) text += `${i+1}. ${t}\n   ${s||''}\n`;
+    });
+  } else if (cardId === 'war-section') {
+    card.querySelectorAll('.news-item').forEach((el, i) => {
+      const t = el.querySelector('.news-text')?.textContent;
+      if (t) text += `${i+1}. ${t}\n`;
+    });
+  } else if (cardId === 'weather-section') {
+    const temp = card.querySelector('.weather-temp-big')?.textContent;
+    const desc = card.querySelector('.weather-desc')?.textContent;
+    const feels = card.querySelector('.weather-feels')?.textContent;
+    const loc = card.querySelector('.weather-location')?.textContent;
+    text += `${loc||''}\n${temp} — ${desc}\n${feels}\n`;
+    card.querySelectorAll('.w-item').forEach(el => {
+      const lbl = el.querySelector('.w-item-label')?.textContent;
+      const val = el.querySelector('.w-item-val')?.textContent;
+      if (lbl && val) text += `${lbl}: ${val}\n`;
+    });
+  } else if (cardId === 'motivation-section') {
+    const q = card.querySelector('.motivation-quote')?.textContent;
+    const d = card.querySelector('.motivation-translation')?.textContent;
+    const a = card.querySelector('.motivation-author')?.textContent;
+    if (q) text += `${q}\n`;
+    if (d) text += `${d}\n`;
+    if (a) text += `${a}\n`;
+  } else if (cardId === 'history-section') {
+    const y = card.querySelector('.history-year')?.textContent;
+    const t = card.querySelector('.history-text')?.textContent;
+    const ago = card.querySelector('.history-ago')?.textContent;
+    if (y && t) text += `${y}: ${t}\n${ago||''}\n`;
+  } else if (cardId === 'word-section') {
+    const w = card.querySelector('.word-main')?.textContent;
+    const ph = card.querySelector('.word-phonetic')?.textContent;
+    const def = card.querySelector('.word-def')?.textContent;
+    const ex = card.querySelector('.word-example')?.textContent;
+    const de = card.querySelector('.word-de')?.textContent;
+    text += `${w} ${ph}\n${def}\n${ex||''}\n${de||''}\n`;
+  } else {
+    // fallback: all text nodes
+    text += card.innerText.replace(/\n{3,}/g, '\n\n').trim();
+  }
+  text += '\n— Maya\'s Morning Brief 🌅';
+  shareText(text, title);
+}
+
+// ═══════════════════════════════════════════════════════
+// PHOTO OF THE DAY
+// ═══════════════════════════════════════════════════════
+// Daily photos: 3 categories rotating by day-of-year
+// Sources: Unsplash (no API key needed for static photo IDs) + NASA APOD
+const photoCategories = [
+  { tag: '🌿 Natur',       queries: ['nature','forest','ocean','mountains','sunset','flowers','landscape'] },
+  { tag: '🏙️ Städte',      queries: ['new-york','architecture','city','los-angeles','tokyo','paris','skyline'] },
+  { tag: '🏛️ Tbilisi',     queries: ['tbilisi','georgia-country','caucasus','old-town','church','cobblestone'] },
+  { tag: '💪 Fitness',     queries: ['fitness','workout','gym','running','yoga','sport','strength'] },
+  { tag: '🐕 Pomeranian',  queries: ['pomeranian','dog','puppy','fluffy-dog','spitz','cute-dog'] },
+  { tag: '💄 Beauty',      queries: ['beauty','makeup','skincare','cosmetics','fashion','style'] },
+  { tag: '✨ Inspiration',  queries: ['inspiration','minimal','aesthetic','morning','light','calm'] },
+];
+
+function getDailyPhotos() {
+  const doy = Math.floor((new Date() - new Date(new Date().getFullYear(),0,0))/86400000);
+  // Pick 3 different categories for today
+  const cats = [];
+  for (let i = 0; i < 3; i++) {
+    cats.push(photoCategories[(doy + i * 3) % photoCategories.length]);
+  }
+  return cats;
+}
+
+async function loadPhotos() {
+  const cats = getDailyPhotos();
+  const doy = Math.floor((new Date() - new Date(new Date().getFullYear(),0,0))/86400000);
+
+  // Unsplash Source API redirect — show loading state first
+  document.getElementById('photo-section').innerHTML = `
+    <div class="card photo-card">
+      <div class="card-header" style="padding:14px 15px 0">
+        <div class="card-title" style="margin:0">📸 Photos of the Day</div>
+        <button class="share-btn" onclick="shareCard('photo-section','📸','Photos of the Day')">⎙ Teilen</button>
+      </div>
+      <div class="photo-gallery" id="photo-gallery-inner">
+        <div style="width:160px;height:160px;border-radius:12px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">⏳</div>
+        <div style="width:160px;height:160px;border-radius:12px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">⏳</div>
+        <div style="width:160px;height:160px;border-radius:12px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">⏳</div>
+      </div>
+    </div>`;
+
+  const photos = cats.map((cat, i) => {
+    const query = cat.queries[(doy + i) % cat.queries.length];
+    const seed = `maya-${doy}-${i}`;
+    // 4K resolution: 3840x2160 from Unsplash, fallback Picsum 3840x2160
+    const unsplashUrl = `https://source.unsplash.com/3840x2160/?${encodeURIComponent(query)}&sig=${seed}`;
+    const picsumUrl = `https://picsum.photos/seed/${seed}/3840/2160`;
+    return { unsplashUrl, picsumUrl, tag: cat.tag, caption: query.replace(/-/g,' ') };
+  });
+
+  const galleryHtml = photos.map((p) => `
+    <div class="photo-item" onclick="openLightbox(this.querySelector('img').src,'${p.tag} — ${p.caption}')">
+      <img src="${p.unsplashUrl}" alt="${p.caption}"
+        onerror="this.src='${p.picsumUrl}'"
+        style="width:160px;height:160px;object-fit:cover;display:block;border-radius:12px"
+        loading="lazy">
+      <div class="photo-tag">${p.tag}</div>
+      <div class="photo-caption">${p.caption}</div>
+    </div>`).join('');
+
+  const inner = document.getElementById('photo-gallery-inner');
+  if (inner) inner.innerHTML = galleryHtml;
+}
+
+function openLightbox(src, caption) {
+  haptic();
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox-caption').textContent = caption;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════════════
+// TO-DO LIST
+// ═══════════════════════════════════════════════════════
+const TODO_KEY = 'maya_todos';
+
+function getTodos() {
+  try { return JSON.parse(localStorage.getItem(TODO_KEY)) || []; }
+  catch { return []; }
+}
+function saveTodos(todos) {
+  localStorage.setItem(TODO_KEY, JSON.stringify(todos));
+}
+function todayStr() {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+}
+
+function processCarryover() {
+  // Move undone todos from previous days to carryover
+  const todos = getTodos();
+  const today = todayStr();
+  todos.forEach(t => {
+    if (t.date !== today && !t.done && !t.carryover) {
+      t.carryover = true;
+      t.originalDate = t.date;
+    }
+  });
+  saveTodos(todos);
+}
+
+function renderTodos() {
+  processCarryover();
+  const todos = getTodos();
+  const today = todayStr();
+  const todayTodos = todos.filter(t => t.date === today);
+  const carryover  = todos.filter(t => t.carryover && !t.done);
+
+  const todayDone  = todayTodos.filter(t => t.done).length;
+  const todayTotal = todayTodos.length;
+
+  const todoHtml = todayTodos.map(t => buildTodoItemHtml(t)).join('');
+
+  const carryHtml = carryover.length ? `
+    <div class="todo-carryover">
+      <div class="todo-carryover-title">↩ Übertragen vom Vortag</div>
+      ${carryover.map(t => `
+        <div class="todo-carryover-item" onclick="addFromCarryover('${t.id}'); haptic()">
+          <span class="todo-carryover-text">${escHtml(t.text)}</span>
+          <span class="todo-carryover-badge">↩ ${t.originalDate||''}</span>
+          <button class="todo-carryover-add-btn">+ Heute</button>
+        </div>`).join('')}
+    </div>` : '';
+
+  document.getElementById('todo-section').innerHTML = `
+    <div class="card todo-card">
+      <div class="card-header">
+        <div class="card-title">✅ To-Do · Heute</div>
+        <button class="share-btn" onclick="shareTodos()">⎙ Teilen</button>
+      </div>
+      <div class="todo-add-row">
+        <input class="todo-add-input" id="todo-new-input" placeholder="Neue Aufgabe…" maxlength="120"
+          onkeydown="if(event.key==='Enter'){addTodo();haptic();}">
+        <button class="todo-add-btn" onclick="addTodo(); haptic()">+</button>
+      </div>
+      <div id="todo-list">${todoHtml || '<p style="font-size:13px;color:#9ca3af;text-align:center;padding:12px 0">Noch keine Aufgaben für heute 🎉</p>'}</div>
+      ${carryHtml}
+      ${todayTotal > 0 ? `
+        <div class="todo-stats">
+          <span class="todo-stat">✅ <strong>${todayDone}</strong> erledigt</span>
+          <span class="todo-stat">⏳ <strong>${todayTotal - todayDone}</strong> offen</span>
+          <span class="todo-stat">📋 <strong>${todayTotal}</strong> gesamt</span>
+        </div>` : ''}
+    </div>`;
+}
+
+function buildTodoItemHtml(t) {
+  const subsHtml = (t.subs || []).map((s, si) => `
+    <div class="todo-sub-item">
+      <div class="todo-sub-check ${s.done?'done':''}" onclick="toggleSub('${t.id}',${si}); haptic()">
+        ${s.done ? '✓' : ''}
+      </div>
+      <span class="todo-sub-text ${s.done?'done':''}">${escHtml(s.text)}</span>
+      <button class="todo-sub-del" onclick="deleteSub('${t.id}',${si}); haptic()">✕</button>
+    </div>`).join('');
+
+  return `
+    <div class="todo-item ${t.done?'done':''}" id="todo-${t.id}">
+      <div class="todo-main-row">
+        <div class="todo-check" onclick="toggleTodo('${t.id}'); haptic()">
+          <span class="todo-check-tick">✓</span>
+        </div>
+        <span class="todo-text">${escHtml(t.text)}</span>
+        <button class="todo-expand-btn" onclick="toggleSubs('${t.id}')" title="Unteraufgaben">⋯</button>
+        <button class="todo-delete-btn" onclick="deleteTodo('${t.id}'); haptic()">✕</button>
+      </div>
+      <div class="todo-subs" id="subs-${t.id}">
+        ${subsHtml}
+        <div class="todo-sub-add-row">
+          <input class="todo-sub-add-input" id="sub-input-${t.id}" placeholder="Unteraufgabe…" maxlength="80"
+            onkeydown="if(event.key==='Enter'){addSub('${t.id}');haptic();}">
+          <button class="todo-sub-add-btn" onclick="addSub('${t.id}'); haptic()">+ Sub</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function genId() { return Math.random().toString(36).slice(2,9); }
+
+function addTodo() {
+  const inp = document.getElementById('todo-new-input');
+  const text = inp?.value.trim();
+  if (!text) return;
+  const todos = getTodos();
+  todos.push({ id: genId(), text, done: false, date: todayStr(), subs: [], carryover: false });
+  saveTodos(todos);
+  inp.value = '';
+  renderTodos();
+}
+
+function toggleTodo(id) {
+  const todos = getTodos();
+  const t = todos.find(t => t.id === id);
+  if (t) { t.done = !t.done; if (t.done) t.carryover = false; }
+  saveTodos(todos);
+  renderTodos();
+}
+
+function deleteTodo(id) {
+  saveTodos(getTodos().filter(t => t.id !== id));
+  renderTodos();
+}
+
+function toggleSubs(id) {
+  const el = document.getElementById('subs-' + id);
+  if (el) el.classList.toggle('open');
+}
+
+function addSub(todoId) {
+  const inp = document.getElementById('sub-input-' + todoId);
+  const text = inp?.value.trim();
+  if (!text) return;
+  const todos = getTodos();
+  const t = todos.find(t => t.id === todoId);
+  if (t) { t.subs = t.subs || []; t.subs.push({ text, done: false }); }
+  saveTodos(todos);
+  renderTodos();
+  // re-open the subs panel
+  setTimeout(() => { const el = document.getElementById('subs-' + todoId); if(el) el.classList.add('open'); }, 10);
+}
+
+function toggleSub(todoId, subIdx) {
+  const todos = getTodos();
+  const t = todos.find(t => t.id === todoId);
+  if (t && t.subs[subIdx]) t.subs[subIdx].done = !t.subs[subIdx].done;
+  saveTodos(todos);
+  renderTodos();
+  setTimeout(() => { const el = document.getElementById('subs-' + todoId); if(el) el.classList.add('open'); }, 10);
+}
+
+function deleteSub(todoId, subIdx) {
+  const todos = getTodos();
+  const t = todos.find(t => t.id === todoId);
+  if (t) t.subs.splice(subIdx, 1);
+  saveTodos(todos);
+  renderTodos();
+  setTimeout(() => { const el = document.getElementById('subs-' + todoId); if(el) el.classList.add('open'); }, 10);
+}
+
+function addFromCarryover(id) {
+  const todos = getTodos();
+  const t = todos.find(t => t.id === id);
+  if (t) { t.carryover = false; t.done = false; t.date = todayStr(); }
+  saveTodos(todos);
+  renderTodos();
+}
+
+function shareTodos() {
+  haptic();
+  const todos = getTodos().filter(t => t.date === todayStr());
+  if (!todos.length) { alert('Keine Todos für heute.'); return; }
+  let text = `✅ Meine Todos für heute:\n\n`;
+  todos.forEach((t, i) => {
+    text += `${t.done ? '☑' : '☐'} ${t.text}\n`;
+    (t.subs||[]).forEach(s => { text += `   ${s.done?'☑':'☐'} ${s.text}\n`; });
+  });
+  text += '\n— Maya\'s Morning Brief 🌅';
+  shareText(text, 'Meine Todos');
+}
+
+// Add share buttons to existing render functions via wrapper
+function withShareHeader(html, cardId, emoji, title) {
+  // Inject share btn into first .card-title found
+  return html.replace(
+    /(<div class="card-title">)(.*?)(<\/div>)/,
+    `<div class="card-header"><div class="card-title">$2</div><button class="share-btn" onclick="shareCard('${cardId}','${emoji}','${title}')">⎙ Teilen</button></div>`
+  );
+}
+
+// ═══════════════════════════════════════════════════════
+// PULL-TO-REFRESH
+// ═══════════════════════════════════════════════════════
+(function() {
+  let startY = 0, pulling = false, triggered = false;
+  const THRESHOLD = 72;
+
+  document.addEventListener('touchstart', e => {
+    if (window.scrollY === 0) {
+      startY = e.touches[0].clientY;
+      pulling = true;
+      triggered = false;
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchmove', e => {
+    if (!pulling) return;
+    const dy = e.touches[0].clientY - startY;
+    const ind = document.getElementById('ptr-indicator');
+    if (dy > 20 && window.scrollY === 0) {
+      if (ind) {
+        ind.classList.add('visible');
+        ind.textContent = dy > THRESHOLD ? '↑ Loslassen zum Aktualisieren' : '↓ Zum Aktualisieren ziehen';
+      }
+      if (dy > THRESHOLD && !triggered) { triggered = true; haptic('medium'); }
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', () => {
+    if (!pulling) return;
+    pulling = false;
+    const ind = document.getElementById('ptr-indicator');
+    if (ind) ind.classList.remove('visible');
+    if (triggered) { triggered = false; refresh(); }
+  });
+})();
+
+// ═══════════════════════════════════════════════════════
+// RECIPE OF THE DAY
+// ═══════════════════════════════════════════════════════
+// All recipes: <400 kcal, Airfryer, no garlic/butter/curry/mint/rucola, lactose-free cheese
+// Rezept-Regeln: kein Öl, keine Pfanne, keine Zwiebelarten (Zwiebeln, Frühlingszwiebeln, Schalotten, Schnittlauch),
+// kein frischer Knoblauch (nur Knoblauchpulver erlaubt), keine Butter, kein Curry, keine Minze, kein Rucola,
+// nur laktosefreier Käse, Airfryer, max 400 kcal
+const recipes = [
+  {
+    name: "Hähnchenbrust mit Paprika & Zucchini",
+    kcal: 248, protein: 38, fat: 4, carbs: 14,
+    badge: "🍗 High Protein",
+    ingredients: [
+      ["Hähnchenbrust", "150g", "165 kcal"],
+      ["Zucchini", "150g", "27 kcal"],
+      ["Paprika (rot)", "100g", "31 kcal"],
+      ["Paprikapulver, Salz, Pfeffer, Zitronensaft", "–", "10 kcal"],
+    ],
+    steps: [
+      "Hähnchen in Streifen schneiden, mit Paprikapulver, Salz, Pfeffer und etwas Zitronensaft würzen.",
+      "Gemüse in mundgerechte Stücke schneiden, ebenfalls würzen.",
+      "Alles in den Airfryer — Air Fry · 200°C · 14 Min., nach 7 Min. wenden.",
+    ],
+    airfryer: "Air Fry · 200°C · 14 Min."
+  },
+  {
+    name: "Lachs mit grünem Spargel",
+    kcal: 302, protein: 34, fat: 14, carbs: 6,
+    badge: "🐟 Omega-3",
+    ingredients: [
+      ["Lachsfilet", "130g", "247 kcal"],
+      ["Grüner Spargel", "150g", "35 kcal"],
+      ["Zitronensaft, Dill, Salz, Pfeffer", "–", "10 kcal"],
+    ],
+    steps: [
+      "Lachs mit Zitronensaft, Dill, Salz und Pfeffer würzen.",
+      "Spargel mit Salz und etwas Zitronensaft vermengen.",
+      "Lachs und Spargel nebeneinander in den Airfryer — Air Fry · 190°C · 12 Min.",
+    ],
+    airfryer: "Air Fry · 190°C · 12 Min."
+  },
+  {
+    name: "Garnelen-Reisnudel Bowl",
+    kcal: 358, protein: 28, fat: 3, carbs: 55,
+    badge: "🍤 Leicht & sättigend",
+    ingredients: [
+      ["Garnelen (TK, aufgetaut)", "150g", "141 kcal"],
+      ["Reisnudeln (trocken)", "60g", "206 kcal"],
+      ["Paprika (rot, gewürfelt)", "60g", "19 kcal"],
+      ["Sojasoße (reduced salt)", "10ml", "6 kcal"],
+    ],
+    steps: [
+      "Reisnudeln nach Packungsanweisung kochen, abgießen.",
+      "Garnelen trocken tupfen, mit Sojasoße marinieren.",
+      "Garnelen im Airfryer — Air Fry · 200°C · 8 Min.",
+      "Mit Nudeln und Paprika anrichten.",
+    ],
+    airfryer: "Air Fry · 200°C · 8 Min."
+  },
+  {
+    name: "Süßkartoffel-Kichererbsen-Balls",
+    kcal: 340, protein: 12, fat: 4, carbs: 62,
+    badge: "🥔 Vegan & sättigend",
+    ingredients: [
+      ["Süßkartoffel (gegart)", "200g", "172 kcal"],
+      ["Kichererbsen (Dose, abgetropft)", "80g", "104 kcal"],
+      ["Haferflocken", "15g", "57 kcal"],
+      ["Kreuzkümmel, Paprikapulver, Salz", "–", "7 kcal"],
+    ],
+    steps: [
+      "Süßkartoffel und Kichererbsen zerdrücken, mit Haferflocken und Gewürzen vermengen.",
+      "Zu kleinen Bällchen formen (ca. 12 Stück).",
+      "Im Airfryer — Air Fry · 190°C · 15 Min., nach 8 Min. wenden.",
+    ],
+    airfryer: "Air Fry · 190°C · 15 Min."
+  },
+  {
+    name: "Thunfisch-Reispatties",
+    kcal: 360, protein: 32, fat: 4, carbs: 34,
+    badge: "🐟 Meal Prep",
+    ingredients: [
+      ["Thunfisch (Dose, in Wasser)", "120g", "116 kcal"],
+      ["Gekochter Reis", "120g", "156 kcal"],
+      ["Ei (1 ganzes)", "50g", "78 kcal"],
+      ["Sojasoße", "8ml", "5 kcal"],
+      ["Paprikapulver, Salz", "–", "5 kcal"],
+    ],
+    steps: [
+      "Thunfisch abtropfen lassen. Mit Reis, ganzem Ei, Sojasoße und Paprikapulver vermengen.",
+      "Zu 4 flachen Patties formen.",
+      "Im Airfryer — Air Fry · 200°C · 10 Min., nach 5 Min. wenden.",
+    ],
+    airfryer: "Air Fry · 200°C · 10 Min."
+  },
+  {
+    name: "Hähnchen-Wrap",
+    kcal: 370, protein: 40, fat: 5, carbs: 38,
+    badge: "🌯 Lunch-Favorit",
+    ingredients: [
+      ["Hähnchenbrust", "150g", "165 kcal"],
+      ["Vollkorn-Tortilla (1 Stück)", "40g", "120 kcal"],
+      ["Eisbergsalat", "40g", "5 kcal"],
+      ["Tomate", "60g", "11 kcal"],
+      ["Fettarmer Joghurt (laktosefrei)", "30g", "20 kcal"],
+      ["Paprikapulver, Kurkuma, Salz", "–", "4 kcal"],
+    ],
+    steps: [
+      "Hähnchen mit Paprikapulver, Kurkuma und Salz würzen, im Airfryer — Air Fry · 200°C · 12 Min., dann in Streifen schneiden.",
+      "Tortilla kurz im Airfryer erwärmen — Reheat · 160°C · 2 Min.",
+      "Mit Salat, Tomate, Hähnchen und Joghurt belegen und einrollen.",
+    ],
+    airfryer: "Air Fry · 200°C · 12 Min. (Hähnchen)"
+  },
+  {
+    name: "Zucchini-Feta-Patties",
+    kcal: 290, protein: 18, fat: 12, carbs: 22,
+    badge: "🥒 Knusprig & leicht",
+    ingredients: [
+      ["Zucchini", "200g", "34 kcal"],
+      ["Laktosefreier Feta", "50g", "133 kcal"],
+      ["Ei (1 ganzes)", "50g", "78 kcal"],
+      ["Haferflocken", "10g", "38 kcal"],
+      ["Salz, Pfeffer, Dill", "–", "5 kcal"],
+    ],
+    steps: [
+      "Zucchini grob raspeln, mit Salz ziehen lassen, kräftig ausdrücken.",
+      "Mit zerkrümeltem Feta, ganzem Ei, Haferflocken und Dill vermengen.",
+      "Zu flachen Patties formen, im Airfryer — Air Fry · 190°C · 14 Min.",
+    ],
+    airfryer: "Air Fry · 190°C · 14 Min."
+  },
+  {
+    name: "Garnelen mit Mango-Salsa",
+    kcal: 240, protein: 26, fat: 2, carbs: 28,
+    badge: "🥭 Frisch & leicht",
+    ingredients: [
+      ["Garnelen (TK, aufgetaut)", "160g", "150 kcal"],
+      ["Mango (frisch)", "80g", "48 kcal"],
+      ["Tomate", "80g", "14 kcal"],
+      ["Limettensaft, Chili-Flocken, Salz", "–", "8 kcal"],
+      ["Sojasoße", "10ml", "6 kcal"],
+    ],
+    steps: [
+      "Garnelen mit Sojasoße und Chili-Flocken marinieren.",
+      "Im Airfryer — Air Fry · 200°C · 8 Min.",
+      "Mango und Tomate würfeln, mit Limettensaft vermengen.",
+      "Alles zusammen anrichten.",
+    ],
+    airfryer: "Air Fry · 200°C · 8 Min."
+  },
+  {
+    name: "Hähnchen-Gemüse-Spieße",
+    kcal: 230, protein: 36, fat: 4, carbs: 12,
+    badge: "🍢 BBQ-Feeling",
+    ingredients: [
+      ["Hähnchenbrust", "140g", "154 kcal"],
+      ["Paprika (gemischt)", "100g", "31 kcal"],
+      ["Champignons", "80g", "18 kcal"],
+      ["Paprikapulver, Salz, Pfeffer, Zitronensaft", "–", "10 kcal"],
+    ],
+    steps: [
+      "Hähnchen in Würfel schneiden, Gemüse ebenfalls.",
+      "Mit Gewürzen und Zitronensaft marinieren — 10 Min. einwirken lassen.",
+      "Auf Holzspieße stecken, im Airfryer — Air Fry · 200°C · 12 Min., zwischendurch drehen.",
+    ],
+    airfryer: "Air Fry · 200°C · 12 Min."
+  },
+  {
+    name: "Ei-Gemüse-Muffins (Airfryer)",
+    kcal: 230, protein: 20, fat: 12, carbs: 10,
+    badge: "🥚 Meal Prep-Snack",
+    ingredients: [
+      ["Eier (ganz, 3 Stück)", "150g", "234 kcal"],
+      ["Paprika", "60g", "19 kcal"],
+      ["Champignons", "60g", "14 kcal"],
+      ["Laktosefreier Käse (gerieben)", "20g", "74 kcal"],
+      ["Salz, Pfeffer, Paprikapulver", "–", "5 kcal"],
+    ],
+    steps: [
+      "Eier verquirlen, Gemüse klein schneiden, Käse reiben.",
+      "Alles vermischen, in Silikonmuffinformen füllen.",
+      "Im Airfryer — Bake · 160°C · 12 Min. bis gestockt.",
+    ],
+    airfryer: "Bake · 160°C · 12 Min."
+  },
+  {
+    name: "Brokkoli-Käse-Bites",
+    kcal: 275, protein: 22, fat: 12, carbs: 18,
+    badge: "🥦 Snack & Beilage",
+    ingredients: [
+      ["Brokkoli (Röschen)", "200g", "68 kcal"],
+      ["Ei (1 ganzes)", "50g", "78 kcal"],
+      ["Laktosefreier Käse (gerieben)", "40g", "148 kcal"],
+      ["Haferflocken", "15g", "57 kcal"],
+      ["Salz, Pfeffer", "–", "4 kcal"],
+    ],
+    steps: [
+      "Brokkoli sehr fein hacken oder kurz mixen.",
+      "Mit ganzem Ei, Käse, Haferflocken, Salz und Pfeffer vermengen.",
+      "Zu Bällchen/Patties formen, im Airfryer — Air Fry · 180°C · 12 Min.",
+    ],
+    airfryer: "Air Fry · 180°C · 12 Min."
+  },
+  {
+    name: "Thunfisch-Paprika-Boat",
+    kcal: 245, protein: 30, fat: 6, carbs: 16,
+    badge: "🫑 Low Carb",
+    ingredients: [
+      ["Thunfisch (Dose, in Wasser)", "120g", "116 kcal"],
+      ["Paprika (2 Hälften)", "160g", "50 kcal"],
+      ["Laktosefreier Käse (gerieben)", "30g", "111 kcal"],
+      ["Tomate", "60g", "11 kcal"],
+      ["Salz, Pfeffer", "–", "5 kcal"],
+    ],
+    steps: [
+      "Paprika halbieren und Kerne entfernen.",
+      "Thunfisch abtropfen, mit Tomate, Salz und Pfeffer vermengen.",
+      "In die Paprika-Hälften füllen, Käse darüber streuen.",
+      "Im Airfryer — Air Fry · 190°C · 10 Min.",
+    ],
+    airfryer: "Air Fry · 190°C · 10 Min."
+  },
+];
+
+function renderRecipe() {
+  const now = new Date();
+  const doy = Math.floor((now - new Date(now.getFullYear(),0,0))/86400000);
+  const r = recipes[doy % recipes.length];
+
+  const ingHtml = r.ingredients.map(([name, amount, kcal]) =>
+    `<li><span>${name} <span style="color:#bbb;font-size:11px">${amount}</span></span><span style="color:#a05020;font-size:11px">${kcal}</span></li>`
+  ).join('');
+
+  const stepsHtml = r.steps.map((s, i) => `<div class="recipe-step" data-n="${i+1}">${s}</div>`).join('');
+
+  document.getElementById('recipe-section').innerHTML = `
+    <div class="card recipe-card">
+      <div class="card-header">
+        <div class="card-title">🍽️ Rezept des Tages</div>
+        <button class="share-btn" onclick="shareRecipe()">⎙ Teilen</button>
+      </div>
+      <span class="recipe-kcal-badge">${r.badge} · ${r.kcal} kcal</span>
+      <div class="recipe-name">${r.name}</div>
+      <div class="recipe-macros">
+        <span class="recipe-macro">🥩 ${r.protein}g Protein</span>
+        <span class="recipe-macro">🫙 ${r.fat}g Fett</span>
+        <span class="recipe-macro">🌾 ${r.carbs}g KH</span>
+      </div>
+      <div class="recipe-section-title">Zutaten</div>
+      <ul class="recipe-ingredients">${ingHtml}</ul>
+      <div class="recipe-section-title">Zubereitung</div>
+      <div class="recipe-steps">${stepsHtml}</div>
+      <div class="recipe-airfryer">🔥 <strong>Airfryer:</strong> ${r.airfryer}</div>
+    </div>`;
+}
+
+function shareRecipe() {
+  haptic();
+  const r = recipes[Math.floor((new Date() - new Date(new Date().getFullYear(),0,0))/86400000) % recipes.length];
+  let text = `🍽️ Rezept des Tages: ${r.name}\n`;
+  text += `${r.kcal} kcal · ${r.protein}g Protein · ${r.fat}g Fett · ${r.carbs}g KH\n\n`;
+  text += `Zutaten:\n`;
+  r.ingredients.forEach(([n,a]) => { text += `• ${n} ${a}\n`; });
+  text += `\nZubereitung:\n`;
+  r.steps.forEach((s,i) => { text += `${i+1}. ${s}\n`; });
+  text += `\n🔥 ${r.airfryer}\n— May's Brief`;
+  shareText(text, r.name);
+}
+
+// ═══════════════════════════════════════════════════════
+// AUTO-REFRESH
+// ═══════════════════════════════════════════════════════
+const REFRESH_TIMES=[[6,0],[12,0],[14,0],[16,0],[18,30]];
+function msUntilNext() {
+  const now=new Date(), cur=now.getHours()*60+now.getMinutes();
+  for(const [h,m] of REFRESH_TIMES){const t=h*60+m;if(t>cur)return(t-cur)*60000-now.getSeconds()*1000;}
+  const tom=new Date(now);tom.setDate(tom.getDate()+1);tom.setHours(6,0,0,0);return tom-now;
+}
+function scheduleNext(){setTimeout(()=>{loadAll(true);scheduleNext();},msUntilNext());}
+
+// ═══════════════════════════════════════════════════════
+// MAIN
+// ═══════════════════════════════════════════════════════
+function loadAll(isScheduled=false) {
+  updateGreeting();
+  renderHoliday();
+  renderBirthday();
+  renderSteps();
+  renderTodos();
+  const h=new Date().getHours(),m=new Date().getMinutes();
+  renderWord();
+  renderHistory();
+  if(!isScheduled||(h===6&&m<=1)) renderMotivation();
+  renderRecipe();
+  loadWeather();
+  loadNews();
+  loadWarNews();
+  loadPhotos();
+}
+
+async function refresh() {
+  const btn=document.getElementById('refresh-btn');
+  btn.classList.add('loading');
+  loadAll(false);
+  await new Promise(r=>setTimeout(r,1400));
+  btn.classList.remove('loading');
+}
+
+loadAll();
+scheduleNext();
+</script>
+</body>
+</html>

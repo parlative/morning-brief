@@ -1,0 +1,30 @@
+{
+  "name": "Maya's Brief",
+  "short_name": "Maya's Brief",
+  "description": "Täglicher Morgenüberblick für Maya",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ac9265",
+  "theme_color": "#ac9265",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./icon_1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
