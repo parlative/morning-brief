@@ -495,6 +495,7 @@
         <div class="shimmer" style="width:55%;height:13px;margin-top:8px"></div>
       </div>
     </div>
+    <div id="recipe-section"></div>
     <div id="news-section">
       <div class="card"><div class="card-title">📰 Breaking News</div>
         <div class="shimmer"></div><div class="shimmer"></div><div class="shimmer" style="width:70%"></div>
@@ -505,7 +506,6 @@
         <div class="shimmer"></div><div class="shimmer" style="width:80%"></div>
       </div>
     </div>
-    <div id="recipe-section"></div>
   </div>
 </div>
 
@@ -2749,7 +2749,18 @@ function msUntilNext() {
 }
 
 // Speichert welcher Tag zuletzt gerendert wurde (für Daily-Content-Wechsel)
+// null = noch nie geladen = sofort beim ersten Aufruf rendern
 let _lastDailyDate = null;
+
+// Mitternachts-Reset: wenn gespeichertes Datum != heute → zurücksetzen
+(function() {
+  const saved = localStorage.getItem('maya_last_daily');
+  const today = new Date().toDateString();
+  if (saved !== today) {
+    localStorage.setItem('maya_last_daily', today);
+    _lastDailyDate = null; // force full reload
+  }
+})();
 
 function isDailyContentStale() {
   const today = new Date().toDateString();
@@ -2778,17 +2789,21 @@ function loadAll(isScheduled=false) {
   renderSteps();
   renderTodos();
 
-  // Daily content: immer bei manuellem Refresh, bei 00:00 oder wenn Tag gewechselt
+  // Daily content:
+  // – immer bei manuellem Refresh (isScheduled=false)
+  // – bei automatischem Refresh nur wenn Tag gewechselt ODER Mitternacht
   const now = new Date();
   const isMidnight = now.getHours() === 0 && now.getMinutes() <= 1;
   const stale = isDailyContentStale();
-  if (!isScheduled || isMidnight || stale) {
+  const forceDaily = !isScheduled || isMidnight || stale;
+
+  if (forceDaily) {
     _lastDailyDate = now.toDateString();
     renderWord();       // Wort des Tages
-    renderMotivation(); // Spruch des Tages
+    renderMotivation(); // Spruch des Tages (Quote of the Day)
     renderHistory();    // Heute in der Geschichte
     renderRecipe();     // Rezept des Tages
-    loadPhotos();       // Fotos des Tages
+    loadPhotos();       // Fotos des Tages — immer frisch laden
   }
 
   loadWeather();
