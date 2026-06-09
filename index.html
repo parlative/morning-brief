@@ -2652,22 +2652,43 @@ function shareRecipe() {
 }
 
 // ═══════════════════════════════════════════════════════
-// AUTO-REFRESH
+// AUTO-REFRESH — mehrmals täglich + Mitternacht für Daily-Content
 // ═══════════════════════════════════════════════════════
-const REFRESH_TIMES=[[6,0],[12,0],[14,0],[16,0],[18,30]];
+const REFRESH_TIMES=[[0,0],[6,0],[12,0],[14,0],[16,0],[18,30]]; // 00:00 NEU!
+
 function msUntilNext() {
-  const now=new Date(), cur=now.getHours()*60+now.getMinutes();
-  for(const [h,m] of REFRESH_TIMES){const t=h*60+m;if(t>cur)return(t-cur)*60000-now.getSeconds()*1000;}
-  const tom=new Date(now);tom.setDate(tom.getDate()+1);tom.setHours(6,0,0,0);return tom-now;
+  const now=new Date();
+  const cur=now.getHours()*60+now.getMinutes();
+  for(const [h,m] of REFRESH_TIMES){
+    const t=h*60+m;
+    if(t>cur) return (t-cur)*60000-now.getSeconds()*1000-now.getMilliseconds();
+  }
+  // Nächste Mitternacht
+  const tom=new Date(now); tom.setDate(tom.getDate()+1); tom.setHours(0,0,2,0);
+  return tom-now;
 }
-function scheduleNext(){setTimeout(()=>{loadAll(true);scheduleNext();},msUntilNext());}
+
+// Speichert welcher Tag zuletzt gerendert wurde (für Daily-Content-Wechsel)
+let _lastDailyDate = null;
+
+function isDailyContentStale() {
+  const today = new Date().toDateString();
+  return _lastDailyDate !== today;
+}
+
+function scheduleNext() {
+  const ms = msUntilNext();
+  setTimeout(() => {
+    loadAll(true);
+    scheduleNext();
+  }, ms);
+}
 
 // ═══════════════════════════════════════════════════════
 // MAIN
 // ═══════════════════════════════════════════════════════
 function loadAll(isScheduled=false) {
   updateGreeting();
-  // Sticky header: set spacer height after render
   requestAnimationFrame(() => {
     adjustHeaderSpacer();
     window.addEventListener('resize', adjustHeaderSpacer);
@@ -2676,15 +2697,23 @@ function loadAll(isScheduled=false) {
   renderBirthday();
   renderSteps();
   renderTodos();
-  const h=new Date().getHours(),m=new Date().getMinutes();
-  renderWord();
-  renderHistory();
-  if(!isScheduled||(h===6&&m<=1)) renderMotivation();
-  renderRecipe();
+
+  // Daily content: immer bei manuellem Refresh, bei 00:00 oder wenn Tag gewechselt
+  const now = new Date();
+  const isMidnight = now.getHours() === 0 && now.getMinutes() <= 1;
+  const stale = isDailyContentStale();
+  if (!isScheduled || isMidnight || stale) {
+    _lastDailyDate = now.toDateString();
+    renderWord();       // Wort des Tages
+    renderMotivation(); // Spruch des Tages
+    renderHistory();    // Heute in der Geschichte
+    renderRecipe();     // Rezept des Tages
+    loadPhotos();       // Fotos des Tages
+  }
+
   loadWeather();
   loadNews();
   loadWarNews();
-  loadPhotos();
 }
 
 async function refresh() {
