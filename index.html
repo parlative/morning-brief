@@ -983,6 +983,8 @@ async function loadWeather() {
     const data=await fetch(url).then(r=>r.json());
     const c=data.current, d=data.daily, h=data.hourly;
     _weatherCache = {c, d, city};
+    // Cache display values for share card
+    window._weatherDisplay = { temp, feels, humid, wind, code, maxT, minT, uv, uvInfo, precSum, precPro, city };
 
     const temp=Math.round(c.temperature_2m), feels=Math.round(c.apparent_temperature);
     const humid=c.relative_humidity_2m, wind=Math.round(c.wind_speed_10m), code=c.weather_code;
@@ -1036,7 +1038,7 @@ async function loadWeather() {
       <div class="card">
         <div class="card-header">
           <div class="card-title">🌡️ Wetter · 📍 ${city}</div>
-          <button class="share-btn" onclick="shareCardAsImage('weather-section','🌡️ Wetter')">📸 Teilen</button>
+          <button class="share-btn" onclick="shareWeatherCard()">📸 Teilen</button>
         </div>
         <div class="weather-top">
           <div>
@@ -1179,8 +1181,9 @@ async function loadNews() {
       const items = await fetchRSS(feed.url, feed.src);
       if (!items || !items.length) continue;
       const top5 = items.slice(0, 5);
+      window._newsLinks = top5.map(item => item.link || '');
       const html = top5.map((item, i) => `
-        <div class="news-item" ${item.link ? `onclick="openInAppBrowser('${item.link.replace(/'/g,"\\'")}'); haptic();" style="cursor:pointer;"` : ''}>
+        <div class="news-item" ${item.link ? `onclick="if(window._newsLinks[${i}]) openInAppBrowser(window._newsLinks[${i}]); haptic();" style="cursor:pointer;"` : ''}>
           <div class="news-num">${i+1}</div>
           <div style="flex:1;">
             <div class="news-text">${item.title}</div>
@@ -1259,8 +1262,10 @@ async function loadWarNews() {
     title: item._lang === 'en' ? await translateToDE(item.title) : item.title
   })));
 
+  // Store URLs safely in a JS array to avoid HTML attribute escaping issues
+  window._warLinks = translated.map(item => item.link || '');
   const html = translated.map((item, i) => `
-    <div class="news-item" ${item.link ? `onclick="openInAppBrowser('${item.link.replace(/'/g,"\\'")}'); haptic();" style="cursor:pointer;"` : ''}>
+    <div class="news-item" ${item.link ? `onclick="if(window._warLinks[${i}]) openInAppBrowser(window._warLinks[${i}]); haptic();" style="cursor:pointer;"` : ''}>
       <div class="news-num">${i+1}</div>
       <div style="flex:1;">
         <div class="news-text">${item.title}</div>
@@ -3458,6 +3463,164 @@ function renderMorningReflection() {
 }
 
 // ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// WEATHER SHARE — Canvas-based card
+// ═══════════════════════════════════════════════════════
+async function generateWeatherCard() {
+  const w = window._weatherDisplay;
+  if (!w) return null;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 1080; canvas.height = 1080;
+  const ctx = canvas.getContext('2d');
+
+  // Sky gradient background
+  const grad = ctx.createLinearGradient(0, 0, 0, 1080);
+  const isWarm = w.temp > 20;
+  if (w.code <= 2) {
+    grad.addColorStop(0, '#1a6fc4'); grad.addColorStop(1, '#4da6f5');
+  } else if (w.code <= 49) {
+    grad.addColorStop(0, '#4a5568'); grad.addColorStop(1, '#718096');
+  } else if (w.code <= 67) {
+    grad.addColorStop(0, '#2d3748'); grad.addColorStop(1, '#4a5568');
+  } else {
+    grad.addColorStop(0, '#1a202c'); grad.addColorStop(1, '#2d3748');
+  }
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1080);
+
+  // Subtle circle deco
+  ctx.globalAlpha = 0.08;
+  ctx.beginPath(); ctx.arc(950, 150, 280, 0, Math.PI*2);
+  ctx.fillStyle = '#fff'; ctx.fill(); ctx.globalAlpha = 1;
+
+  ctx.textAlign = 'center'; ctx.fillStyle = '#fff';
+
+  // Label
+  ctx.font = 'bold 30px -apple-system, Arial';
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.fillText('🌤  WETTER · 📍 ' + (w.city || 'Dein Standort'), 540, 110);
+
+  // Big weather emoji
+  ctx.font = '160px serif';
+  ctx.fillText(wIcon(w.code), 540, 310);
+
+  // Temperature
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 160px -apple-system, Arial';
+  ctx.fillText(w.temp + '°', 540, 510);
+
+  // Description
+  ctx.font = 'bold 52px -apple-system, Arial';
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.fillText(wDesc(w.code), 540, 590);
+
+  // Feels like
+  ctx.font = '38px -apple-system, Arial';
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.fillText('🌡️ Gefühlt ' + w.feels + '°', 540, 650);
+
+  // Stats row
+  const stats = [
+    { label: '🥶 Min', val: w.minT + '°' },
+    { label: '🔥 Max', val: w.maxT + '°' },
+    { label: '💧 Feuchte', val: w.humid + '%' },
+    { label: '💨 Wind', val: w.wind + ' km/h' },
+  ];
+  const boxW = 220, boxH = 100, gap = 20;
+  const totalW = stats.length * boxW + (stats.length - 1) * gap;
+  const startX = (1080 - totalW) / 2;
+  stats.forEach((s, i) => {
+    const bx = startX + i * (boxW + gap);
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    ctx.beginPath(); ctx.roundRect(bx, 720, boxW, boxH, 16); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.65)'; ctx.font = '24px -apple-system, Arial';
+    ctx.fillText(s.label, bx + boxW/2, 756);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 36px -apple-system, Arial';
+    ctx.fillText(s.val, bx + boxW/2, 798);
+  });
+
+  // UV
+  ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '32px -apple-system, Arial';
+  ctx.fillText('☀️ UV-Index: ' + w.uv + ' — ' + w.uvInfo.l, 540, 870);
+
+  // Rain
+  const rainText = w.precSum > 0 ? `☔ ${w.precSum.toFixed(1)} mm · ${w.precPro}% Wahrscheinlichkeit` : '🌵 Kein Regen erwartet';
+  ctx.font = '30px -apple-system, Arial';
+  ctx.fillText(rainText, 540, 915);
+
+  // Watermark
+  const now = new Date();
+  const months = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+  ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.font = '24px -apple-system, Arial';
+  ctx.fillText(`Maya's Morning Brief · ${now.getDate()}. ${months[now.getMonth()]} ${now.getFullYear()}`, 540, 1048);
+
+  return new Promise(res => canvas.toBlob(res, 'image/png', 0.95));
+}
+
+async function shareWeatherCard() {
+  haptic('medium');
+  const btn = event?.target?.closest('.share-btn');
+  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+  try {
+    const blob = await generateWeatherCard();
+    if (btn) { btn.textContent = '📸 Teilen'; btn.disabled = false; }
+    if (!blob) { showToast('Wetter noch nicht geladen'); return; }
+    const file = new File([blob], 'wetter.png', { type: 'image/png' });
+    const imgUrl = URL.createObjectURL(blob);
+
+    document.getElementById('custom-share-sheet')?.remove();
+    const sheet = document.createElement('div');
+    sheet.id = 'custom-share-sheet';
+    sheet.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;justify-content:flex-end;background:rgba(0,0,0,0.5);';
+    sheet.innerHTML = `
+      <div style="background:#fff;border-radius:20px 20px 0 0;padding:20px 16px calc(env(safe-area-inset-bottom)+16px);">
+        <div style="width:36px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 14px;"></div>
+        <img src="${imgUrl}" style="width:100%;max-height:300px;object-fit:contain;border-radius:12px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,0.12);">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">
+          <button id="ws-instagram" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;">
+            <div style="width:56px;height:56px;border-radius:14px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);display:flex;align-items:center;justify-content:center;font-size:28px;">📸</div>
+            <span style="font-size:11px;color:#333;font-weight:600;">Instagram</span>
+          </button>
+          <button id="ws-native" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;">
+            <div style="width:56px;height:56px;border-radius:14px;background:#007aff;display:flex;align-items:center;justify-content:center;font-size:28px;">📤</div>
+            <span style="font-size:11px;color:#333;font-weight:600;">Teilen</span>
+          </button>
+          <button id="ws-save" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;">
+            <div style="width:56px;height:56px;border-radius:14px;background:#34c759;display:flex;align-items:center;justify-content:center;font-size:28px;">💾</div>
+            <span style="font-size:11px;color:#333;font-weight:600;">Speichern</span>
+          </button>
+        </div>
+        <button id="ws-cancel" style="width:100%;background:#f2f2f7;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:600;color:#333;cursor:pointer;">Abbrechen</button>
+      </div>`;
+    document.body.appendChild(sheet);
+    sheet.addEventListener('click', e => { if (e.target === sheet) { sheet.remove(); URL.revokeObjectURL(imgUrl); }});
+    document.getElementById('ws-instagram').onclick = async () => {
+      sheet.remove();
+      if (navigator.share && navigator.canShare?.({files:[file]})) {
+        try { await navigator.share({ files: [file], title: "Wetter — Maya's Brief" }); } catch {}
+      } else {
+        const a = document.createElement('a'); a.href = imgUrl; a.download = 'wetter.png'; a.click();
+        setTimeout(() => { window.location.href = 'instagram://'; }, 600);
+        showToast('📸 Gespeichert → Instagram öffnen');
+      }
+      URL.revokeObjectURL(imgUrl);
+    };
+    document.getElementById('ws-native').onclick = async () => {
+      try { await navigator.share({ files: [file], title: "Wetter — Maya's Morning Brief" }); } catch {}
+      sheet.remove(); URL.revokeObjectURL(imgUrl);
+    };
+    document.getElementById('ws-save').onclick = () => {
+      const a = document.createElement('a'); a.href = imgUrl; a.download = 'wetter.png'; a.click();
+      showToast('💾 Bild gespeichert!');
+      sheet.remove();
+    };
+    document.getElementById('ws-cancel').onclick = () => { sheet.remove(); URL.revokeObjectURL(imgUrl); };
+  } catch(e) {
+    if (btn) { btn.textContent = '📸 Teilen'; btn.disabled = false; }
+    showToast('Fehler beim Erstellen');
+  }
+}
+
 // SHARE FIX — Word of Day uses canvas-based card
 // ═══════════════════════════════════════════════════════
 async function generateWordCard() {
