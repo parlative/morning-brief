@@ -4,27 +4,27 @@
   "description": "Täglicher Morgenüberblick für Maya",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#d2b3f8",
+  "background_color": "#000000",
+  "theme_color": "#f5a223",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "./icon_1024.png",
+      "src": "./icon_hello_1024.png",
       "sizes": "1024x1024",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "./icon.png",
+      "src": "./icon_hello_512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "./icon.png",
+      "src": "./icon_hello_192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ]
 }

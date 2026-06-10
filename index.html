@@ -7,10 +7,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Maya's Brief">
   <link rel="manifest" href="./manifest.json">
-  <link rel="apple-touch-icon" href="./icon_1024.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="./icon_1024.png">
-  <link rel="apple-touch-icon" sizes="512x512" href="./icon_1024.png">
-  <link rel="apple-touch-icon" sizes="1024x1024" href="./icon_1024.png">
+  <link rel="apple-touch-icon" href="./icon_hello_1024.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./icon_hello_1024.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="./icon_hello_512.png">
+  <link rel="apple-touch-icon" sizes="1024x1024" href="./icon_hello_1024.png">
   <title>Maya's Morning Brief</title>
   <style>
     :root {
@@ -496,6 +496,7 @@
       </div>
     </div>
     <div id="recipe-section"></div>
+    <div id="morning-reflection-section"></div>
     <div id="news-section">
       <div class="card"><div class="card-title">📰 Breaking News</div>
         <div class="shimmer"></div><div class="shimmer"></div><div class="shimmer" style="width:70%"></div>
@@ -544,6 +545,16 @@
   <div style="padding:12px 12px 0;max-width:430px;margin:0 auto;" id="aidy-content">
     <!-- filled by renderAidy() -->
   </div>
+</div>
+
+<!-- ═══ IN-APP BROWSER ═══ -->
+<div id="inapp-browser" style="display:none;position:fixed;inset:0;z-index:9998;flex-direction:column;">
+  <div style="background:#1c1c1e;padding:12px 14px;padding-top:max(env(safe-area-inset-top),14px);display:flex;align-items:center;gap:10px;">
+    <button onclick="closeInAppBrowser()" style="background:rgba(255,255,255,0.12);border:none;border-radius:50%;width:32px;height:32px;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+    <div id="inapp-url-bar" style="flex:1;background:rgba(255,255,255,0.1);border-radius:8px;padding:6px 10px;font-size:11px;color:rgba(255,255,255,0.6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+    <button id="inapp-open-btn" onclick="openInBrowser()" style="background:rgba(255,255,255,0.12);border:none;border-radius:8px;padding:6px 10px;color:#fff;font-size:11px;font-weight:600;cursor:pointer;">Safari ↗</button>
+  </div>
+  <iframe id="inapp-iframe" style="flex:1;border:none;background:#fff;width:100%;height:100%;" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
 </div>
 
 <!-- ═══ TAB BAR ═══ -->
@@ -1129,6 +1140,7 @@ async function fetchRSS(feedUrl, src) {
     return data.items.slice(0, 10).map(i => ({
       title: i.title?.trim() || '',
       pubDate: i.pubDate || new Date().toISOString(),
+      link: i.link || i.guid || '',
       src
     })).filter(i => i.title);
   }
@@ -1168,11 +1180,11 @@ async function loadNews() {
       if (!items || !items.length) continue;
       const top5 = items.slice(0, 5);
       const html = top5.map((item, i) => `
-        <div class="news-item">
+        <div class="news-item" ${item.link ? `onclick="openInAppBrowser('${item.link.replace(/'/g,"\\'")}'); haptic();" style="cursor:pointer;"` : ''}>
           <div class="news-num">${i+1}</div>
-          <div>
+          <div style="flex:1;">
             <div class="news-text">${item.title}</div>
-            <div class="news-source">📺 ${item.src} · 🕐 ${new Date(item.pubDate).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr</div>
+            <div class="news-source">📺 ${item.src} · 🕐 ${new Date(item.pubDate).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr${item.link ? ' · <span style="color:#0a84ff;font-size:11px;">Artikel lesen →</span>' : ''}</div>
           </div>
         </div>`).join('');
       document.getElementById('news-section').innerHTML = `
@@ -1248,11 +1260,11 @@ async function loadWarNews() {
   })));
 
   const html = translated.map((item, i) => `
-    <div class="news-item">
+    <div class="news-item" ${item.link ? `onclick="openInAppBrowser('${item.link.replace(/'/g,"\\'")}'); haptic();" style="cursor:pointer;"` : ''}>
       <div class="news-num">${i+1}</div>
-      <div>
+      <div style="flex:1;">
         <div class="news-text">${item.title}</div>
-        <div class="news-source">📡 ${item._src} · 🕐 ${new Date(item.pubDate).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr</div>
+        <div class="news-source">📡 ${item._src} · 🕐 ${new Date(item.pubDate).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr${item.link ? ' · <span style="color:#ff375f;font-size:11px;">Artikel lesen →</span>' : ''}</div>
       </div>
     </div>`).join('');
 
@@ -1316,7 +1328,7 @@ function renderWord() {
     <div class="card word-card">
       <div class="card-header">
         <div class="card-title">📖 Word of the Day</div>
-        <button class="share-btn" onclick="shareCardAsImage('word-section','📖 Word of the Day')">📸 Teilen</button>
+        <button class="share-btn" onclick="shareWordCard()">📸 Teilen</button>
       </div>
       <div class="word-main">${w.w}</div>
       <div class="word-phonetic">${w.ph}</div>
@@ -2849,6 +2861,7 @@ function loadAll(isScheduled=false) {
     renderMotivation(); // Spruch des Tages (Quote of the Day)
     renderHistory();    // Heute in der Geschichte
     renderRecipe();     // Rezept des Tages
+    renderMorningReflection(); // Morgenreflexion
     loadPhotos();       // Fotos des Tages — immer frisch laden
   }
 
@@ -3327,6 +3340,251 @@ function switchTab(tab) {
   document.getElementById('tab-' + tab).classList.add('active');
   if (tab === 'evening') renderSummary();
   if (tab === 'aidy') renderAidy();
+}
+
+// ═══════════════════════════════════════════════════════
+// IN-APP BROWSER
+// ═══════════════════════════════════════════════════════
+let _inAppBrowserUrl = '';
+
+function openInAppBrowser(url) {
+  if (!url) return;
+  _inAppBrowserUrl = url;
+  const browser = document.getElementById('inapp-browser');
+  const iframe = document.getElementById('inapp-iframe');
+  const urlBar = document.getElementById('inapp-url-bar');
+  // Display URL without protocol
+  urlBar.textContent = url.replace(/^https?:\/\//,'');
+  // Try to load in iframe
+  iframe.src = url;
+  browser.style.display = 'flex';
+  // Prevent body scroll
+  document.body.style.overflow = 'hidden';
+}
+
+function closeInAppBrowser() {
+  const browser = document.getElementById('inapp-browser');
+  const iframe = document.getElementById('inapp-iframe');
+  browser.style.display = 'none';
+  iframe.src = 'about:blank';
+  document.body.style.overflow = '';
+}
+
+function openInBrowser() {
+  if (_inAppBrowserUrl) window.open(_inAppBrowserUrl, '_blank');
+}
+
+// ═══════════════════════════════════════════════════════
+// MORNING REFLECTION
+// ═══════════════════════════════════════════════════════
+const MORNING_REFLECT_KEY = 'maya_morning_reflect_';
+
+function getMorningReflectKey() {
+  const n = new Date();
+  return `${MORNING_REFLECT_KEY}${n.getFullYear()}-${n.getMonth()}-${n.getDate()}`;
+}
+
+function getMorningReflection() {
+  const saved = localStorage.getItem(getMorningReflectKey());
+  return saved ? JSON.parse(saved) : null;
+}
+
+function saveMorningReflection(mood, grateful) {
+  localStorage.setItem(getMorningReflectKey(), JSON.stringify({ mood, grateful, ts: Date.now() }));
+}
+
+function submitMorningReflection() {
+  const moodEl = document.getElementById('mr-mood');
+  const gratefulEl = document.getElementById('mr-grateful');
+  if (!moodEl || !gratefulEl) return;
+  const mood = parseInt(moodEl.value);
+  const grateful = gratefulEl.value.trim();
+  if (!grateful) { showToast('Schreib bitte wofür du dankbar bist 💜'); return; }
+  saveMorningReflection(mood, grateful);
+  haptic('medium');
+  showToast('✨ Schön! Hab einen wundervollen Tag!');
+  renderMorningReflection();
+}
+
+function renderMorningReflection() {
+  const el = document.getElementById('morning-reflection-section');
+  if (!el) return;
+  const saved = getMorningReflection();
+
+  const moodEmojis = ['😰','😟','😕','😐','🙂','😊','😄','🥰','🤩','🌟'];
+
+  if (saved) {
+    const moodEmoji = moodEmojis[Math.min(saved.mood - 1, 9)];
+    el.innerHTML = `
+      <div class="card" style="background:linear-gradient(135deg,#f0fff4,#e6ffee);border-color:#86efac;">
+        <div class="card-header">
+          <div class="card-title">🌸 Morgenreflexion</div>
+          <button class="share-btn" onclick="localStorage.removeItem(getMorningReflectKey()); renderMorningReflection();">✏️ Neu</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <span style="font-size:42px;">${moodEmoji}</span>
+          <div>
+            <div style="font-size:15px;font-weight:700;color:#16a34a;">Stimmung: ${saved.mood}/10</div>
+            <div style="font-size:13px;color:#059669;margin-top:3px;">Dankbar für heute ✨</div>
+          </div>
+        </div>
+        <div style="background:rgba(22,163,74,0.08);border-radius:12px;padding:10px 12px;margin-top:10px;border-left:3px solid #4ade80;">
+          <div style="font-size:13px;color:#15803d;line-height:1.55;">${saved.grateful}</div>
+        </div>
+      </div>`;
+  } else {
+    el.innerHTML = `
+      <div class="card" style="background:linear-gradient(135deg,#f0fff4,#e6ffee);border-color:#86efac;">
+        <div class="card-title">🌸 Morgenreflexion</div>
+        <div style="font-size:13px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Wie fühlst du dich gerade? (1–10)</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <span style="font-size:13px;color:#9ca3af;">😰 1</span>
+          <input type="range" id="mr-mood" min="1" max="10" value="7" style="flex:1;accent-color:#16a34a;" oninput="document.getElementById('mr-mood-val').textContent=moodEmojis[Math.min(this.value-1,9)]+' '+this.value">
+          <span style="font-size:13px;color:#9ca3af;">10 🌟</span>
+          <span id="mr-mood-val" style="font-size:16px;font-weight:800;color:#16a34a;min-width:36px;">😄 7</span>
+        </div>
+        <div style="font-size:13px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">🙏 Wofür bin ich heute dankbar?</div>
+        <textarea id="mr-grateful" style="width:100%;background:rgba(255,255,255,0.8);border:1.5px solid #86efac;border-radius:12px;padding:10px 12px;font-size:14px;color:#15803d;outline:none;resize:none;font-family:inherit;line-height:1.5;" rows="3" placeholder="z.B. Kaffee am Morgen, Sonnenschein, Gesundheit..."></textarea>
+        <button onclick="submitMorningReflection();haptic('medium');" style="width:100%;background:#16a34a;color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;">✨ Speichern & Tag starten</button>
+      </div>`;
+    // Fix reference to moodEmojis inside inline oninput
+    const moodInput = el.querySelector('#mr-mood');
+    const moodVal = el.querySelector('#mr-mood-val');
+    const emojis = ['😰','😟','😕','😐','🙂','😊','😄','🥰','🤩','🌟'];
+    if (moodInput) moodInput.addEventListener('input', () => {
+      moodVal.textContent = emojis[Math.min(parseInt(moodInput.value)-1,9)] + ' ' + moodInput.value;
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// SHARE FIX — Word of Day uses canvas-based card
+// ═══════════════════════════════════════════════════════
+async function generateWordCard() {
+  const w = words[getDailyIndex(words.length)];
+  const canvas = document.createElement('canvas');
+  canvas.width = 1080; canvas.height = 1080;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  const grad = ctx.createLinearGradient(0, 0, 1080, 1080);
+  grad.addColorStop(0, '#eef2ff'); grad.addColorStop(1, '#e0e7ff');
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1080);
+
+  // Decorative circle
+  ctx.globalAlpha = 0.10;
+  ctx.beginPath(); ctx.arc(880, 200, 280, 0, Math.PI*2);
+  ctx.fillStyle = '#818cf8'; ctx.fill(); ctx.globalAlpha = 1;
+
+  // Label
+  ctx.fillStyle = '#818cf8'; ctx.font = 'bold 28px -apple-system, Arial'; ctx.textAlign = 'center';
+  ctx.fillText('📖  WORD OF THE DAY', 540, 140);
+
+  // Divider
+  ctx.strokeStyle = '#c7d2fe'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(200, 165); ctx.lineTo(880, 165); ctx.stroke();
+
+  // Word
+  ctx.fillStyle = '#3730a3'; ctx.font = 'bold 110px -apple-system, Arial';
+  ctx.fillText(w.w, 540, 310);
+
+  // Phonetic
+  ctx.fillStyle = '#818cf8'; ctx.font = '38px -apple-system, Arial';
+  ctx.fillText(w.ph, 540, 375);
+
+  // Part of speech pill (drawn as rounded rect)
+  const posText = w.pos.toUpperCase();
+  ctx.font = 'bold 26px -apple-system, Arial';
+  const pw = ctx.measureText(posText).width + 40;
+  ctx.fillStyle = '#e0e7ff';
+  ctx.beginPath(); ctx.roundRect(540 - pw/2, 400, pw, 44, 10);
+  ctx.fill();
+  ctx.fillStyle = '#4338ca'; ctx.fillText(posText, 540, 430);
+
+  // Definition
+  ctx.fillStyle = '#3730a3'; ctx.font = '44px -apple-system, Arial';
+  wrapText(ctx, w.def, 540, 530, 860, 58);
+
+  // Example
+  ctx.fillStyle = '#6366f1'; ctx.font = 'italic 36px -apple-system, Arial';
+  wrapText(ctx, w.ex, 540, 740, 860, 50);
+
+  // German translation
+  ctx.fillStyle = '#818cf8'; ctx.font = '32px -apple-system, Arial';
+  wrapText(ctx, '🇩🇪 ' + w.de, 540, 880, 860, 45);
+
+  // Watermark
+  const now = new Date();
+  const months = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  ctx.fillStyle = 'rgba(55,48,163,0.3)'; ctx.font = '24px -apple-system, Arial';
+  ctx.fillText(`Maya's Morning Brief · ${now.getDate()}. ${months[now.getMonth()]} ${now.getFullYear()}`, 540, 1048);
+
+  return new Promise(res => canvas.toBlob(res, 'image/png', 0.95));
+}
+
+async function shareWordCard() {
+  haptic('medium');
+  const btn = event?.target?.closest('.share-btn');
+  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+  try {
+    const blob = await generateWordCard();
+    if (btn) { btn.textContent = '📸 Teilen'; btn.disabled = false; }
+    if (!blob) { showToast('Fehler'); return; }
+    const file = new File([blob], 'word-of-the-day.png', { type: 'image/png' });
+    const imgUrl = URL.createObjectURL(blob);
+
+    document.getElementById('custom-share-sheet')?.remove();
+    const sheet = document.createElement('div');
+    sheet.id = 'custom-share-sheet';
+    sheet.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;justify-content:flex-end;background:rgba(0,0,0,0.5);';
+    sheet.innerHTML = `
+      <div style="background:#fff;border-radius:20px 20px 0 0;padding:20px 16px calc(env(safe-area-inset-bottom)+16px);">
+        <div style="width:36px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 14px;"></div>
+        <img src="${imgUrl}" style="width:100%;max-height:300px;object-fit:contain;border-radius:12px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,0.12);">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">
+          <button id="wds-instagram" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;">
+            <div style="width:56px;height:56px;border-radius:14px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);display:flex;align-items:center;justify-content:center;font-size:28px;">📸</div>
+            <span style="font-size:11px;color:#333;font-weight:600;">Instagram</span>
+          </button>
+          <button id="wds-native" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;">
+            <div style="width:56px;height:56px;border-radius:14px;background:#007aff;display:flex;align-items:center;justify-content:center;font-size:28px;">📤</div>
+            <span style="font-size:11px;color:#333;font-weight:600;">Teilen</span>
+          </button>
+          <button id="wds-save" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;">
+            <div style="width:56px;height:56px;border-radius:14px;background:#34c759;display:flex;align-items:center;justify-content:center;font-size:28px;">💾</div>
+            <span style="font-size:11px;color:#333;font-weight:600;">Speichern</span>
+          </button>
+        </div>
+        <button id="wds-cancel" style="width:100%;background:#f2f2f7;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:600;color:#333;cursor:pointer;">Abbrechen</button>
+      </div>`;
+    document.body.appendChild(sheet);
+    sheet.addEventListener('click', e => { if (e.target === sheet) { sheet.remove(); URL.revokeObjectURL(imgUrl); }});
+
+    document.getElementById('wds-instagram').onclick = async () => {
+      sheet.remove();
+      if (navigator.share && navigator.canShare?.({files:[file]})) {
+        try { await navigator.share({ files: [file], title: "Word of the Day — Maya's Brief" }); } catch {}
+      } else {
+        const a = document.createElement('a'); a.href = imgUrl; a.download = 'word-of-the-day.png'; a.click();
+        setTimeout(() => { window.location.href = 'instagram://'; }, 600);
+        showToast('📸 Gespeichert → Instagram öffnen');
+      }
+      URL.revokeObjectURL(imgUrl);
+    };
+    document.getElementById('wds-native').onclick = async () => {
+      try { await navigator.share({ files: [file], title: "Word of the Day — Maya's Morning Brief" }); } catch {}
+      sheet.remove(); URL.revokeObjectURL(imgUrl);
+    };
+    document.getElementById('wds-save').onclick = () => {
+      const a = document.createElement('a'); a.href = imgUrl; a.download = 'word-of-the-day.png'; a.click();
+      showToast('💾 Bild gespeichert!');
+      sheet.remove();
+    };
+    document.getElementById('wds-cancel').onclick = () => { sheet.remove(); URL.revokeObjectURL(imgUrl); };
+  } catch(e) {
+    if (btn) { btn.textContent = '📸 Teilen'; btn.disabled = false; }
+    showToast('Fehler beim Erstellen');
+  }
 }
 
 loadAll();
