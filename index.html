@@ -541,7 +541,7 @@
 <!-- ═══ PAGE 3: AIDY ═══ -->
 <div id="page-aidy" class="page">
   <div class="summary-header" style="position:sticky;top:0;z-index:90;background:linear-gradient(160deg,#1a1035,#2d1b69,#1a1035);padding-top:max(env(safe-area-inset-top),48px);">
-    <div class="summary-stars" style="font-size:24px;letter-spacing:6px;">🫶 🌸 💜</div>
+    <div class="summary-stars" style="font-size:24px;letter-spacing:6px;">🫶</div>
     <div class="summary-title" style="font-size:22px;">Aidy</div>
     <div class="summary-sub" style="color:rgba(255,255,255,0.7);font-size:13px;">Du bist sicher. Du bist stark. Das geht vorbei.</div>
   </div>
@@ -9323,8 +9323,8 @@ function getMorningReflection() {
   return saved ? JSON.parse(saved) : null;
 }
 
-function saveMorningReflection(mood, grateful) {
-  localStorage.setItem(getMorningReflectKey(), JSON.stringify({ mood, grateful, ts: Date.now() }));
+function saveMorningReflection(mood, grateful, excited, happy) {
+  localStorage.setItem(getMorningReflectKey(), JSON.stringify({ mood, grateful, excited, happy, ts: Date.now() }));
 }
 
 function submitMorningReflection() {
@@ -9333,8 +9333,10 @@ function submitMorningReflection() {
   if (!moodEl || !gratefulEl) return;
   const mood = parseInt(moodEl.value);
   const grateful = gratefulEl.value.trim();
+  const excited = document.getElementById('mr-excited')?.value?.trim() || '';
+  const happy = document.getElementById('mr-happy')?.value?.trim() || '';
   if (!grateful) { showToast('Schreib bitte wofür du dankbar bist 💜'); return; }
-  saveMorningReflection(mood, grateful);
+  saveMorningReflection(mood, grateful, excited, happy);
   haptic('medium');
   showToast('✨ Schön! Hab einen wundervollen Tag!');
   renderMorningReflection();
@@ -9363,8 +9365,11 @@ function renderMorningReflection() {
           </div>
         </div>
         <div style="background:rgba(22,163,74,0.08);border-radius:12px;padding:10px 12px;margin-top:10px;border-left:3px solid #4ade80;">
+          <div style="font-size:11px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">🙏 Dankbar für</div>
           <div style="font-size:13px;color:#15803d;line-height:1.55;">${saved.grateful}</div>
         </div>
+        ${saved.excited ? `<div style="background:rgba(251,191,36,0.1);border-radius:12px;padding:10px 12px;margin-top:8px;border-left:3px solid #fbbf24;"><div style="font-size:11px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">🌟 Freue mich auf</div><div style="font-size:13px;color:#92400e;line-height:1.55;">${saved.excited}</div></div>` : ''}
+        ${saved.happy ? `<div style="background:rgba(236,72,153,0.08);border-radius:12px;padding:10px 12px;margin-top:8px;border-left:3px solid #f9a8d4;"><div style="font-size:11px;font-weight:700;color:#db2777;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">💕 Macht mich glücklich</div><div style="font-size:13px;color:#9d174d;line-height:1.55;">${saved.happy}</div></div>` : ''}
       </div>`;
   } else {
     el.innerHTML = `
@@ -9379,6 +9384,10 @@ function renderMorningReflection() {
         </div>
         <div style="font-size:13px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">🙏 Wofür bin ich heute dankbar?</div>
         <textarea id="mr-grateful" style="width:100%;background:rgba(255,255,255,0.8);border:1.5px solid #86efac;border-radius:12px;padding:10px 12px;font-size:14px;color:#15803d;outline:none;resize:none;font-family:inherit;line-height:1.5;" rows="3" placeholder="z.B. Kaffee am Morgen, Sonnenschein, Gesundheit..."></textarea>
+        <div style="font-size:13px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 6px;">🌟 Worauf freue ich mich heute?</div>
+        <textarea id="mr-excited" style="width:100%;background:rgba(255,255,255,0.8);border:1.5px solid #fbbf24;border-radius:12px;padding:10px 12px;font-size:14px;color:#92400e;outline:none;resize:none;font-family:inherit;line-height:1.5;" rows="2" placeholder="z.B. ein Treffen, ein Projekt, ein Moment..."></textarea>
+        <div style="font-size:13px;font-weight:700;color:#db2777;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 6px;">💕 Was macht mich jetzt glücklich?</div>
+        <textarea id="mr-happy" style="width:100%;background:rgba(255,255,255,0.8);border:1.5px solid #f9a8d4;border-radius:12px;padding:10px 12px;font-size:14px;color:#9d174d;outline:none;resize:none;font-family:inherit;line-height:1.5;" rows="2" placeholder="z.B. dieses Lied, der Morgen, mein Kaffee..."></textarea>
         <button onclick="submitMorningReflection();haptic('medium');" style="width:100%;background:#16a34a;color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;">✨ Speichern & Tag starten</button>
       </div>`;
     // Fix reference to moodEmojis inside inline oninput
@@ -9699,7 +9708,7 @@ async function shareWeatherCard() {
 
 // SHARE FIX — Word of Day uses canvas-based card
 // ═══════════════════════════════════════════════════════
-async function generateWordCard() {
+async function generateWordCard(includeGerman = true) {
   const w = words[getDailyIndex(words.length)];
   const canvas = document.createElement('canvas');
   canvas.width = 1080; canvas.height = 1080;
@@ -9746,12 +9755,14 @@ async function generateWordCard() {
 
   // Example
   ctx.fillStyle = '#6366f1'; ctx.font = 'italic 36px -apple-system, Arial';
-  wrapText(ctx, w.ex, 540, 740, 860, 50);
+  wrapText(ctx, w.ex, 540, includeGerman ? 740 : 800, 860, 50);
 
-  // German translation — centered
-  ctx.fillStyle = '#818cf8'; ctx.font = '32px -apple-system, Arial';
-  ctx.textAlign = 'center';
-  wrapText(ctx, '🇩🇪 ' + w.de, 540, 880, 860, 45);
+  // German translation — only if requested
+  if (includeGerman && w.de) {
+    ctx.fillStyle = '#818cf8'; ctx.font = '32px -apple-system, Arial';
+    ctx.textAlign = 'center';
+    wrapText(ctx, '🇩🇪 ' + w.de, 540, 880, 860, 45);
+  }
 
   // Footer
   ctx.fillStyle = 'rgba(55,48,163,0.3)'; ctx.font = '24px -apple-system, Arial';
@@ -9764,26 +9775,56 @@ async function generateWordCard() {
 async function shareWordCard() {
   haptic('medium');
   const btn = event?.target?.closest('.share-btn');
-  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
-  try {
-    const blob = await generateWordCard();
-    if (btn) { btn.textContent = '📸 Teilen'; btn.disabled = false; }
-    if (!blob) { showToast('Fehler'); return; }
-    const file = new File([blob], 'aidy-word.png', { type: 'image/png' });
-    try {
-      await navigator.share({ files: [file], title: 'Word of the Day' });
-    } catch(e) {
-      if (e.name !== 'AbortError') {
-        const imgUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = imgUrl; a.download = 'aidy-word.png'; a.click();
-        setTimeout(() => URL.revokeObjectURL(imgUrl), 1000);
-        showToast('💾 Bild gespeichert');
+
+  // Show share options sheet
+  return new Promise((resolve) => {
+    const sheet = document.createElement('div');
+    sheet.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;justify-content:flex-end;';
+    sheet.innerHTML = `
+      <div style="position:absolute;inset:0;background:rgba(0,0,0,0.45);" id="wsc-backdrop"></div>
+      <div style="position:relative;background:#fff;border-radius:20px 20px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom));max-width:430px;width:100%;margin:0 auto;">
+        <div style="width:40px;height:4px;background:#e5e7eb;border-radius:2px;margin:0 auto 16px;"></div>
+        <div style="font-size:16px;font-weight:700;color:#1e1b4b;margin-bottom:6px;">📸 Word of the Day teilen</div>
+        <div style="font-size:13px;color:#6b7280;margin-bottom:16px;">Soll die deutsche Übersetzung mit dabei sein?</div>
+        <button id="wsc-with" style="width:100%;background:linear-gradient(135deg,#4f46e5,#6d28d9);color:#fff;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;">🇩🇪 Mit Übersetzung teilen</button>
+        <button id="wsc-without" style="width:100%;background:#f3f4f6;color:#374151;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:10px;">Ohne Übersetzung teilen</button>
+        <button id="wsc-cancel" style="width:100%;background:none;color:#9ca3af;border:none;padding:10px;font-size:14px;cursor:pointer;">Abbrechen</button>
+      </div>`;
+    document.body.appendChild(sheet);
+
+    const dismiss = () => { sheet.remove(); resolve(); };
+
+    sheet.querySelector('#wsc-backdrop').onclick = dismiss;
+    sheet.querySelector('#wsc-cancel').onclick = dismiss;
+
+    const doShare = async (includeGerman) => {
+      sheet.remove();
+      if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+      try {
+        const blob = await generateWordCard(includeGerman);
+        if (btn) { btn.textContent = '📸 Teilen'; btn.disabled = false; }
+        if (!blob) { showToast('Fehler'); resolve(); return; }
+        const file = new File([blob], 'aidy-word.png', { type: 'image/png' });
+        try {
+          await navigator.share({ files: [file], title: 'Word of the Day' });
+        } catch(e) {
+          if (e.name !== 'AbortError') {
+            const imgUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = imgUrl; a.download = 'aidy-word.png'; a.click();
+            setTimeout(() => URL.revokeObjectURL(imgUrl), 1000);
+            showToast('💾 Bild gespeichert');
+          }
+        }
+      } catch(e) {
+        if (btn) { btn.textContent = '📸 Teilen'; btn.disabled = false; }
+        showToast('Fehler beim Erstellen');
       }
-    }
-  } catch(e) {
-    if (btn) { btn.textContent = '📸 Teilen'; btn.disabled = false; }
-    showToast('Fehler beim Erstellen');
-  }
+      resolve();
+    };
+
+    sheet.querySelector('#wsc-with').onclick = () => doShare(true);
+    sheet.querySelector('#wsc-without').onclick = () => doShare(false);
+  });
 }
 
 loadAll();
