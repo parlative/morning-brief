@@ -1567,7 +1567,10 @@ function renderSummary() {
       ${r.good?`<div style="background:rgba(22,163,74,0.08);border-radius:12px;padding:10px 12px;margin-bottom:8px;border-left:4px solid #86efac;"><div style="font-size:11px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Was gut war</div><div style="font-size:14px;">${r.good}</div></div>`:''}
       ${r.hard?`<div style="background:rgba(255,159,10,0.08);border-radius:12px;padding:10px 12px;margin-bottom:8px;border-left:4px solid #fcd34d;"><div style="font-size:11px;font-weight:700;color:#b45309;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Was schwierig war</div><div style="font-size:14px;">${r.hard}</div></div>`:''}
       ${r.grateful?`<div style="background:rgba(124,58,237,0.08);border-radius:12px;padding:10px 12px;border-left:4px solid #c4b5fd;"><div style="font-size:11px;font-weight:700;color:#5b21b6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Dankbarkeit</div><div style="font-size:14px;">${r.grateful}</div></div>`:''}
-      <button class="aidy-btn secondary" style="margin-top:10px;" onclick="clearReflection()">✏️ Neu schreiben</button>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="aidy-btn secondary" style="flex:1;" onclick="editReflection()">✏️ Bearbeiten</button>
+        <button class="aidy-btn secondary" style="flex:1;background:#fff0f0;color:#b91c1c;border-color:#fca5a5;" onclick="clearReflection()">🗑️ Löschen</button>
+      </div>
     </div>`;
   })() : reflectionHtml;
 
@@ -8849,14 +8852,41 @@ function renderReflectionResult() {
     ${r.hard?`<div style="background:rgba(255,159,10,0.08);border-radius:12px;padding:10px 12px;margin-bottom:8px;border-left:4px solid #fcd34d;"><div style="font-size:11px;font-weight:700;color:#b45309;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">💪 Was schwierig war</div><div style="font-size:14px;color:var(--text);">${r.hard}</div></div>`:''}
     ${r.grateful?`<div style="background:rgba(124,58,237,0.08);border-radius:12px;padding:10px 12px;margin-bottom:8px;border-left:4px solid #c4b5fd;"><div style="font-size:11px;font-weight:700;color:#5b21b6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">🙏 Dankbarkeit</div><div style="font-size:14px;color:var(--text);">${r.grateful}</div></div>`:''}
     <div style="display:flex;gap:8px;margin-top:8px;">
-      <button class="aidy-btn secondary" style="flex:1;" onclick="clearReflection()">✏️ Neu schreiben</button>
+      <button class="aidy-btn secondary" style="flex:1;" onclick="editReflection()">✏️ Bearbeiten</button>
       <button class="aidy-btn secondary" style="flex:1;" onclick="openReflectionArchive()">📚 Archiv</button>
+      <button class="aidy-btn secondary" style="flex:1;background:#fff0f0;color:#b91c1c;border-color:#fca5a5;" onclick="clearReflection()">🗑️</button>
     </div>`;
 }
 
 function clearReflection() {
   localStorage.removeItem(REFLECT_KEY + reflectKey());
   renderSummary();
+}
+
+function editReflection() {
+  const r = getReflection();
+  if (!r) return;
+  const el = document.getElementById('reflection-card');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="aidy-title" style="margin-bottom:12px;">📔 Tagesreflexion bearbeiten</div>
+    <div style="font-size:12px;font-weight:700;color:#5b21b6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Wie war dein Tag? (1–10)</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+      <span style="font-size:13px;color:var(--subtext);">😰 1</span>
+      <input type="range" id="reflect-mood" min="1" max="10" value="${r.mood}" style="flex:1;" oninput="document.getElementById('mood-val').textContent=this.value">
+      <span style="font-size:13px;color:var(--subtext);">10 🌟</span>
+      <span id="mood-val" style="font-size:16px;font-weight:800;color:#5b21b6;min-width:20px;">${r.mood}</span>
+    </div>
+    <div style="font-size:12px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">✅ Was war heute gut?</div>
+    <textarea id="reflect-good" class="reflect-area" rows="2" placeholder="z.B. gutes Gespräch, Sport gemacht...">${r.good||''}</textarea>
+    <div style="font-size:12px;font-weight:700;color:#b45309;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 5px;">💪 Was war schwierig?</div>
+    <textarea id="reflect-hard" class="reflect-area" rows="2" placeholder="Was hat dich heute herausgefordert?">${r.hard||''}</textarea>
+    <div style="font-size:12px;font-weight:700;color:#5b21b6;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 5px;">🙏 Wofür bin ich dankbar?</div>
+    <textarea id="reflect-grateful" class="reflect-area" rows="2" placeholder="3 kleine oder große Dinge...">${r.grateful||''}</textarea>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="aidy-btn" style="flex:2;" onclick="submitReflection()">💜 Speichern</button>
+      <button class="aidy-btn secondary" style="flex:1;" onclick="renderReflectionResult()">Abbrechen</button>
+    </div>`;
 }
 
 function openReflectionArchive() {
@@ -9355,7 +9385,10 @@ function renderMorningReflection() {
       <div class="card" style="background:linear-gradient(135deg,#f0fff4,#e6ffee);border-color:#86efac;">
         <div class="card-header">
           <div class="card-title">🌸 Morgenreflexion</div>
-          <button class="share-btn" onclick="localStorage.removeItem(getMorningReflectKey()); renderMorningReflection();">✏️ Neu</button>
+          <div style="display:flex;gap:6px;">
+            <button class="share-btn" onclick="editMorningReflection()">✏️ Bearbeiten</button>
+            <button class="share-btn" style="background:#fff0f0;color:#b91c1c;" onclick="localStorage.removeItem(getMorningReflectKey()); renderMorningReflection();">🗑️</button>
+          </div>
         </div>
         <div style="display:flex;align-items:center;gap:14px;">
           <span style="font-size:42px;">${moodEmoji}</span>
@@ -9398,6 +9431,40 @@ function renderMorningReflection() {
       moodVal.textContent = emojis[Math.min(parseInt(moodInput.value)-1,9)] + ' ' + moodInput.value;
     });
   }
+}
+
+function editMorningReflection() {
+  const saved = getMorningReflection();
+  if (!saved) return;
+  const el = document.getElementById('morning-reflection-section');
+  if (!el) return;
+  const emojis = ['😰','😟','😕','😐','🙂','😊','😄','🥰','🤩','🌟'];
+  el.innerHTML = `
+    <div class="card" style="background:linear-gradient(135deg,#f0fff4,#e6ffee);border-color:#86efac;">
+      <div class="card-title">🌸 Morgenreflexion bearbeiten</div>
+      <div style="font-size:13px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Wie fühlst du dich gerade? (1–10)</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <span style="font-size:13px;color:#9ca3af;">😰 1</span>
+        <input type="range" id="mr-mood" min="1" max="10" value="${saved.mood}" style="flex:1;accent-color:#16a34a;">
+        <span style="font-size:13px;color:#9ca3af;">10 🌟</span>
+        <span id="mr-mood-val" style="font-size:16px;font-weight:800;color:#16a34a;min-width:36px;">${emojis[Math.min(saved.mood-1,9)]} ${saved.mood}</span>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">🙏 Wofür bin ich heute dankbar?</div>
+      <textarea id="mr-grateful" style="width:100%;background:rgba(255,255,255,0.8);border:1.5px solid #86efac;border-radius:12px;padding:10px 12px;font-size:14px;color:#15803d;outline:none;resize:none;font-family:inherit;line-height:1.5;" rows="3">${saved.grateful||''}</textarea>
+      <div style="font-size:13px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 6px;">🌟 Worauf freue ich mich heute?</div>
+      <textarea id="mr-excited" style="width:100%;background:rgba(255,255,255,0.8);border:1.5px solid #fbbf24;border-radius:12px;padding:10px 12px;font-size:14px;color:#92400e;outline:none;resize:none;font-family:inherit;line-height:1.5;" rows="2">${saved.excited||''}</textarea>
+      <div style="font-size:13px;font-weight:700;color:#db2777;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 6px;">💕 Was macht mich jetzt glücklich?</div>
+      <textarea id="mr-happy" style="width:100%;background:rgba(255,255,255,0.8);border:1.5px solid #f9a8d4;border-radius:12px;padding:10px 12px;font-size:14px;color:#9d174d;outline:none;resize:none;font-family:inherit;line-height:1.5;" rows="2">${saved.happy||''}</textarea>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button onclick="submitMorningReflection();haptic('medium');" style="flex:2;background:#16a34a;color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">💚 Speichern</button>
+        <button onclick="renderMorningReflection();" style="flex:1;background:#f0fdf4;color:#16a34a;border:1.5px solid #86efac;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">Abbrechen</button>
+      </div>
+    </div>`;
+  const moodInput = el.querySelector('#mr-mood');
+  const moodVal = el.querySelector('#mr-mood-val');
+  if (moodInput) moodInput.addEventListener('input', () => {
+    moodVal.textContent = emojis[Math.min(parseInt(moodInput.value)-1,9)] + ' ' + moodInput.value;
+  });
 }
 
 // ═══════════════════════════════════════════════════════
