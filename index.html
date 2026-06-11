@@ -8625,13 +8625,13 @@ async function shareRecipeCanvas() {
     const now = new Date();
     const months = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
     ctx.fillStyle = 'rgba(122,56,16,0.5)'; ctx.font = '26px -apple-system, Arial';
-    ctx.fillText(`${now.getDate()}. ${months[now.getMonth()]} ${now.getFullYear()} · Maya's Morning Brief`, 60, 130);
+    ctx.fillText(`${now.getDate()}. ${months[now.getMonth()]} ${now.getFullYear()}`, 60, 130);
 
-    // Badge
+    // Badge (ohne kcal)
     ctx.fillStyle = '#ff6b2b';
-    ctx.beginPath(); ctx.roundRect(60, 160, ctx.measureText(`${r.badge} · ${r.kcal} kcal`).width + 50, 52, 26); ctx.fill();
+    ctx.beginPath(); ctx.roundRect(60, 160, ctx.measureText(`${r.badge} ${r.category}`).width + 50, 52, 26); ctx.fill();
     ctx.fillStyle = '#fff'; ctx.font = 'bold 28px -apple-system, Arial';
-    ctx.fillText(`${r.badge} · ${r.kcal} kcal`, 85, 196);
+    ctx.fillText(`${r.badge} ${r.category || 'Frühstück'}`, 85, 196);
 
     // Name (umbrechen)
     let y = wrapText(r.name, 60, 290, 960, 60, 'bold 52px -apple-system, Arial', '#7a3810');
@@ -8654,12 +8654,10 @@ async function shareRecipeCanvas() {
     ctx.fillStyle = '#a05020'; ctx.font = 'bold 28px -apple-system, Arial';
     ctx.fillText('ZUTATEN', 60, y);
     y += 16;
-    r.ingredients.forEach(([name, amount, kcal]) => {
+    r.ingredients.forEach(([name, amount]) => {
       y += 48;
       ctx.fillStyle = '#5a2e10'; ctx.font = '30px -apple-system, Arial';
       ctx.fillText(`• ${name}  ${amount !== '–' ? amount : ''}`, 70, y);
-      ctx.fillStyle = '#a05020'; ctx.font = '26px -apple-system, Arial'; ctx.textAlign = 'right';
-      ctx.fillText(kcal, 1020, y); ctx.textAlign = 'left';
       ctx.strokeStyle = 'rgba(248,180,120,0.35)'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(70, y + 14); ctx.lineTo(1020, y + 14); ctx.stroke();
     });
@@ -8685,9 +8683,9 @@ async function shareRecipeCanvas() {
     ctx.fillStyle = '#7a4500'; ctx.font = 'bold 30px -apple-system, Arial';
     ctx.fillText(`🔥 Airfryer: ${r.airfryer}`, 85, y + 8);
 
-    // Wasserzeichen
+    // Footer
     ctx.fillStyle = 'rgba(122,56,16,0.35)'; ctx.font = '24px -apple-system, Arial'; ctx.textAlign = 'center';
-    ctx.fillText("Maya's Morning Brief 🌅", W / 2, H - 30);
+    ctx.fillText("by Aidy", W / 2, y + 80);
 
     if (btn) { btn.textContent = '📸 Teilen'; btn.disabled = false; }
 
