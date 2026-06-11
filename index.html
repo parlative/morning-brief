@@ -8512,10 +8512,13 @@ async function shareRecipeCanvas() {
     ctx.fillText(`${now.getDate()}. ${months[now.getMonth()]} ${now.getFullYear()}`, 60, 130);
 
     // Badge (ohne kcal)
+    ctx.font = 'bold 28px -apple-system, Arial';
+    const badgeText = r.badge;
+    const badgeW = ctx.measureText(badgeText).width + 50;
     ctx.fillStyle = '#ff6b2b';
-    ctx.beginPath(); ctx.roundRect(60, 160, ctx.measureText(`${r.badge}`).width + 50, 52, 26); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 28px -apple-system, Arial';
-    ctx.fillText(`${r.badge}`, 85, 196);
+    ctx.beginPath(); ctx.roundRect(60, 160, badgeW, 52, 26); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.fillText(badgeText, 85, 196);
 
     // Name (umbrechen)
     let y = wrapText(r.name, 60, 290, 960, 60, 'bold 52px -apple-system, Arial', '#7a3810');
