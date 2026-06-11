@@ -1,6 +1,6 @@
 {
-  "name": "Maya's Brief",
-  "short_name": "Maya's Brief",
+  "name": "Aidy",
+  "short_name": "Aidy",
   "description": "Täglicher Morgenüberblick für Maya",
   "start_url": "./index.html",
   "display": "standalone",
