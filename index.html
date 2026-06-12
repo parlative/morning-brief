@@ -14,16 +14,16 @@
   <title>Aidy</title>
   <style>
     :root {
-      --bg: #f5f5f7;
+      --bg: #f2f0ed;
       --card: #ffffff;
-      --text: #1d1d1f;
-      --subtext: #6e6e73;
-      --accent: #ff9f0a;
-      --accent2: #30d158;
-      --accent3: #3b6ea5;
-      --accent4: #ff375f;
-      --border: #e5e5ea;
-      --shadow: 0 2px 14px rgba(0,0,0,0.07);
+      --text: #1a1814;
+      --subtext: #7a7570;
+      --accent: #e8a020;      /* Bernstein — Hauptakzent */
+      --accent2: #5a9e6e;     /* Salbeigrün — positiv */
+      --accent3: #4a7ab0;     /* Stahlblau — Info */
+      --accent4: #c85050;     /* Terrakotta — Warnung */
+      --border: #e2ddd8;
+      --shadow: 0 2px 16px rgba(0,0,0,0.06);
       --radius: 18px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -155,17 +155,17 @@
     .card-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.9px; color: var(--subtext); margin-bottom: 11px; }
 
     /* ── Holiday ── */
-    .holiday-card { background: linear-gradient(135deg,#fff8dc,#fff0a0); border-color:#f0c840; }
+    .holiday-card { background: linear-gradient(135deg,#fffbf0,#fff5d6); border-color:#e8c060; }
     .holiday-emoji { font-size: 36px; margin-bottom: 6px; }
-    .holiday-name { font-size: 21px; font-weight: 700; color: #6a4200; }
-    .holiday-type { font-size: 13px; color: #9a6010; margin-top: 4px; font-weight: 500; }
+    .holiday-name { font-size: 21px; font-weight: 700; color: #5a3c00; }
+    .holiday-type { font-size: 13px; color: #8a6010; margin-top: 4px; font-weight: 500; }
 
     /* ── Birthday ── */
-    .birthday-card { background: linear-gradient(135deg,#fff0f5,#fce4ec); border-color:#ffb3c6; }
+    .birthday-card { background: linear-gradient(135deg,#fdf8f0,#faecd8); border-color:#e0b870; }
     .birthday-top { display: flex; align-items: center; gap: 14px; }
-    .birthday-days { font-size: 56px; font-weight: 800; color: var(--accent4); line-height: 1; letter-spacing: -3px; animation: bounce 2.5s ease-in-out infinite; }
-    .birthday-right .birthday-label { font-size: 15px; color: #b03050; font-weight: 600; line-height: 1.4; }
-    .birthday-right .birthday-sub { font-size: 13px; color: #c06080; margin-top: 3px; }
+    .birthday-days { font-size: 56px; font-weight: 800; color: var(--accent); line-height: 1; letter-spacing: -3px; animation: bounce 2.5s ease-in-out infinite; }
+    .birthday-right .birthday-label { font-size: 15px; color: #6a4010; font-weight: 600; line-height: 1.4; }
+    .birthday-right .birthday-sub { font-size: 13px; color: #9a6830; margin-top: 3px; }
 
     /* ── Weather ── */
     .weather-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:16px; }
@@ -183,8 +183,8 @@
     .mm-pill { flex:1; border-radius:13px; padding:10px 12px; text-align:center; }
     .mm-pill span { font-size:11px; color:var(--subtext); display:block; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px; }
     .mm-pill strong { font-size: 22px; font-weight: 700; }
-    .mm-min { background: #e8f4ff; } .mm-min strong { color: var(--accent3); }
-    .mm-max { background: #fff0f0; } .mm-max strong { color: var(--accent4); }
+    .mm-min { background: #eaf2fa; } .mm-min strong { color: var(--accent3); }
+    .mm-max { background: #fdf4ec; } .mm-max strong { color: #c07030; }
 
     /* ── UV Index bar ── */
     .uv-row { margin-top: 10px; }
@@ -196,56 +196,56 @@
     .week-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
     .week-row::-webkit-scrollbar { display: none; }
     .week-day { flex: 0 0 auto; background: var(--bg); border-radius: 13px; padding: 10px 8px; text-align: center; min-width: 52px; }
-    .week-day.today { background: #e8f0fe; border: 1.5px solid #b0ccf8; }
+    .week-day.today { background: #eaf2fa; border: 1.5px solid #a8c8e8; }
     .week-day-name { font-size: 11px; font-weight: 700; color: var(--subtext); text-transform: uppercase; }
     .week-day-icon { font-size: 22px; margin: 5px 0; }
     .week-day-max { font-size: 14px; font-weight: 700; color: var(--text); }
     .week-day-min { font-size: 12px; color: var(--subtext); margin-top: 2px; }
 
     /* ── Steps ── */
-    .steps-card { background: linear-gradient(135deg,#f0fff4,#e6ffee); border-color: #86efac; }
+    .steps-card { background: linear-gradient(135deg,#f4faf6,#eaf4ee); border-color: #a8d8b8; }
     .steps-ring-wrap { display: flex; align-items: center; gap: 16px; }
     .steps-ring { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
     .steps-ring svg { transform: rotate(-90deg); }
     .steps-ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .steps-ring-pct { font-size: 15px; font-weight: 800; color: #16a34a; }
-    .steps-ring-label { font-size: 9px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+    .steps-ring-pct { font-size: 15px; font-weight: 800; color: var(--accent2); }
+    .steps-ring-label { font-size: 9px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.5px; }
     .steps-info { flex: 1; }
-    .steps-count { font-size: 28px; font-weight: 800; color: #16a34a; letter-spacing: -1px; line-height: 1; }
-    .steps-goal { font-size: 13px; color: #4ade80; font-weight: 500; margin-top: 3px; }
-    .steps-extra { font-size: 12px; color: #059669; margin-top: 4px; font-weight: 600; }
+    .steps-count { font-size: 28px; font-weight: 800; color: var(--accent2); letter-spacing: -1px; line-height: 1; }
+    .steps-goal { font-size: 13px; color: #78b890; font-weight: 500; margin-top: 3px; }
+    .steps-extra { font-size: 12px; color: #4a8860; margin-top: 4px; font-weight: 600; }
     .steps-btn-row { display: flex; gap: 8px; margin-top: 12px; }
-    .steps-btn { flex: 1; background: #dcfce7; color: #16a34a; border: 1.5px solid #86efac; border-radius: 12px; padding: 8px 0; font-size: 13px; font-weight: 700; cursor: pointer; transition: transform 0.1s; }
+    .steps-btn { flex: 1; background: #d8f0e0; color: var(--accent2); border: 1.5px solid #a8d8b8; border-radius: 12px; padding: 8px 0; font-size: 13px; font-weight: 700; cursor: pointer; transition: transform 0.1s; }
     .steps-btn:active { transform: scale(0.95); }
-    .steps-btn.minus { background: #fff; color: #6b7280; border-color: #d1d5db; }
-    .steps-reset { margin-top: 6px; width: 100%; background: none; border: none; color: #9ca3af; font-size: 11px; cursor: pointer; padding: 4px; }
+    .steps-btn.minus { background: #fff; color: var(--subtext); border-color: var(--border); }
+    .steps-reset { margin-top: 6px; width: 100%; background: none; border: none; color: var(--subtext); font-size: 11px; cursor: pointer; padding: 4px; }
     /* manual input row */
     .steps-input-row { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
-    .steps-input { flex: 1; background: #fff; border: 1.5px solid #86efac; border-radius: 12px; padding: 9px 12px; font-size: 16px; font-weight: 600; color: var(--text); text-align: center; outline: none; -webkit-appearance: none; }
-    .steps-input:focus { border-color: #16a34a; box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
-    .steps-set-btn { background: #16a34a; color: #fff; border: none; border-radius: 12px; padding: 9px 18px; font-size: 14px; font-weight: 700; cursor: pointer; transition: transform 0.1s, opacity 0.15s; flex-shrink: 0; }
+    .steps-input { flex: 1; background: #fff; border: 1.5px solid #a8d8b8; border-radius: 12px; padding: 9px 12px; font-size: 16px; font-weight: 600; color: var(--text); text-align: center; outline: none; -webkit-appearance: none; }
+    .steps-input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(90,158,110,0.15); }
+    .steps-set-btn { background: var(--accent2); color: #fff; border: none; border-radius: 12px; padding: 9px 18px; font-size: 14px; font-weight: 700; cursor: pointer; transition: transform 0.1s, opacity 0.15s; flex-shrink: 0; }
     .steps-set-btn:active { transform: scale(0.95); opacity: 0.85; }
-    .steps-hint { font-size: 11px; color: #9ca3af; text-align: center; margin-top: 5px; }
+    .steps-hint { font-size: 11px; color: var(--subtext); text-align: center; margin-top: 5px; }
     /* calorie panels */
-    .kcal-divider { height: 1px; background: #bbf7d0; margin: 14px 0; }
+    .kcal-divider { height: 1px; background: #c8e8d0; margin: 14px 0; }
     .kcal-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 2px; }
     .kcal-panel { border-radius: 13px; padding: 12px; }
-    .kcal-panel.gym  { background: #fff7ed; border: 1.5px solid #fdba74; }
-    .kcal-panel.rest { background: #eff6ff; border: 1.5px solid #93c5fd; }
+    .kcal-panel.gym  { background: #fdf4ec; border: 1.5px solid #e8c090; }
+    .kcal-panel.rest { background: #eef4fa; border: 1.5px solid #a8c8e8; }
     .kcal-panel-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
-    .kcal-panel.gym  .kcal-panel-title { color: #c2410c; }
-    .kcal-panel.rest .kcal-panel-title { color: #1d4ed8; }
+    .kcal-panel.gym  .kcal-panel-title { color: #a06020; }
+    .kcal-panel.rest .kcal-panel-title { color: var(--accent3); }
     .kcal-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
     .kcal-label { font-size: 11px; color: var(--subtext); }
     .kcal-val { font-size: 14px; font-weight: 700; color: var(--text); }
     .kcal-extra-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-    .kcal-extra-label { font-size: 11px; color: #059669; }
-    .kcal-extra-val { font-size: 14px; font-weight: 700; color: #059669; }
+    .kcal-extra-label { font-size: 11px; color: var(--accent2); }
+    .kcal-extra-val { font-size: 14px; font-weight: 700; color: var(--accent2); }
     .kcal-total-row { border-top: 1px solid rgba(0,0,0,0.08); margin-top: 6px; padding-top: 6px; display: flex; justify-content: space-between; align-items: baseline; }
     .kcal-total-label { font-size: 11px; font-weight: 700; color: var(--text); }
-    .kcal-panel.gym  .kcal-total-val { font-size: 18px; font-weight: 800; color: #ea580c; }
-    .kcal-panel.rest .kcal-total-val { font-size: 18px; font-weight: 800; color: #2563eb; }
-    .kcal-note { font-size: 10px; color: #9ca3af; text-align: center; margin-top: 8px; }
+    .kcal-panel.gym  .kcal-total-val { font-size: 18px; font-weight: 800; color: #b06830; }
+    .kcal-panel.rest .kcal-total-val { font-size: 18px; font-weight: 800; color: var(--accent3); }
+    .kcal-note { font-size: 10px; color: var(--subtext); text-align: center; margin-top: 8px; }
 
     /* ── News ── */
     .news-item { padding:11px 0; border-bottom:1px solid var(--border); display:flex; gap:11px; align-items:flex-start; }
@@ -318,7 +318,8 @@
     /* ── Photo of the Day ── */
     .photo-card { padding: 0; overflow: hidden; }
     .photo-card .card-title { padding: 14px 18px 0; margin-bottom: 10px; }
-    .photo-gallery { display: flex; gap: 8px; overflow-x: auto; padding: 0 18px 14px; scrollbar-width: none; }
+    .photo-gallery { display: flex; gap: 8px; overflow-x: auto; padding: 0 18px 14px 18px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .photo-gallery::after { content: ''; flex: 0 0 2px; }
     .photo-gallery::-webkit-scrollbar { display: none; }
     .photo-item { flex: 0 0 auto; position: relative; border-radius: 12px; overflow: hidden; cursor: pointer; }
     .photo-item img { width: 160px; height: 160px; object-fit: cover; display: block; transition: transform 0.3s; }
@@ -516,11 +517,11 @@
 <div id="page-evening" class="page">
   <div class="summary-header" style="position:sticky;top:0;z-index:90;padding-top:max(env(safe-area-inset-top),48px);">
     <div class="summary-stars">⭐ ✨ 🌙</div>
-    <div class="summary-title">Abend-Zusammenfassung</div>
+    <div class="summary-title">Mein Abend</div>
     <div id="summary-date" class="summary-sub"></div>
-    <div style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
-      <span id="evening-last-update" style="font-size:11px;color:rgba(255,255,255,0.55);"></span>
-      <button onclick="haptic('medium'); renderSummary();" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;" id="evening-refresh-btn">↻</button>
+    <div class="last-update-row" style="margin-top:8px;">
+      <span id="evening-last-update" class="last-update" style="color:rgba(255,255,255,0.55);"></span>
+      <button onclick="haptic('medium'); renderSummary();" class="refresh-btn" id="evening-refresh-btn" style="color:rgba(255,255,255,0.7);">↻</button>
     </div>
   </div>
   <div class="summary-content" id="summary-content">
@@ -703,10 +704,10 @@ function adjustHeaderSpacer() {
 function updateGreeting() {
   const h = new Date().getHours();
   let text, emoji;
-  if (h < 10)  { text = "Guten Morgen, Maya"; emoji = "☀️"; }
-  else if (h < 12) { text = "Guten Morgen, Maya"; emoji = "☀️"; }
-  else if (h < 18) { text = "Hallo, Maya"; emoji = "👋"; }
-  else             { text = "Gute Nacht, Maya"; emoji = "🌙"; }
+  if (h < 10)      { text = "Guten Morgen, Maya"; emoji = "☀️"; }
+  else if (h < 18) { text = "Guten Tag, Maya";    emoji = "👋"; }
+  else if (h < 22) { text = "Guten Abend, Maya";  emoji = "🌇"; }
+  else             { text = "Gute Nacht, Maya";   emoji = "🌙"; }
   document.getElementById('greeting').innerHTML = `<span class="sun">${emoji}</span>${text}`;
   const now = new Date();
   const days = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
@@ -1464,7 +1465,7 @@ function renderSummary() {
   document.getElementById('summary-date').textContent=
     `📅 ${days[now.getDay()]}, ${now.getDate()}. ${months[now.getMonth()]} ${now.getFullYear()}`;
   document.getElementById('evening-last-update').textContent=
-    `Zuletzt aktualisiert: ${now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr`;
+    `🔄 Zuletzt: ${now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr`;
 
   // ── NIE GESPERRT: Vor 20 Uhr wird der gespeicherte Vortags-Snapshot gezeigt ──
   const EVENING_SNAP_KEY = 'maya_evening_snapshot';
@@ -2162,7 +2163,7 @@ const photoCurated = [
   ]},
   { tag:'🌿 Natur',  photos:[
     {id:'1441974231531-c6227db76b6e',cap:'Grüner Wald'},     {id:'1518173946687-a71ca18a43b0',cap:'Naturpfad'},
-    {id:'1506905489827-e2df1f07abe4',cap:'Berglandschaft'},  {id:'1469474968028-56623f02e42e',cap:'Wasserfall'},
+    {id:'1500534289069-c8feed9765be',cap:'Berglandschaft'},  {id:'1469474968028-56623f02e42e',cap:'Wasserfall'},
   ]},
   { tag:'🏙️ Architektur', photos:[
     {id:'1486325212027-8081e485255e',cap:'Moderne Stadt'},    {id:'1477959858617-67f85cf4f1df',cap:'Skyline'},
@@ -2183,6 +2184,30 @@ const photoCurated = [
   { tag:'🏔️ Berge',  photos:[
     {id:'1464822759023-fed622ff2c3b',cap:'Alpengipfel'},      {id:'1454496522488-7a8e488e8606',cap:'Bergsee'},
     {id:'1483728642387-6c3bdd6c93e5',cap:'Bergpanorama'},     {id:'1519681393784-d120267933ba',cap:'Schneeberge'},
+  ]},
+  { tag:'🍽️ Essen', photos:[
+    {id:'1476224203421-9ac39bcb3b28',cap:'Frühstück'},        {id:'1504674900247-0877df9cc836',cap:'Leckeres Gericht'},
+    {id:'1490645292946-c3a7e1eb3702',cap:'Foodbowl'},          {id:'1498837167922-ddd27525d352',cap:'Gesund & Bunt'},
+  ]},
+  { tag:'💪 Fitness', photos:[
+    {id:'1517836357463-d25dfeac3438',cap:'Training'},          {id:'1571019614242-c5c5dee9f50b',cap:'Workout'},
+    {id:'1583454110551-21f2fa2afe61',cap:'Kraft'},             {id:'1546483875-ad9da7b8a8d3',cap:'Sport'},
+  ]},
+  { tag:'✈️ Reisen', photos:[
+    {id:'1488085061851-f25ee49dc93e',cap:'Fernweh'},           {id:'1469854523086-cc02fe5d8800',cap:'Horizont'},
+    {id:'1476514525535-07fb3b4ae5f1',cap:'Abenteuer'},         {id:'1530521954074-e0a103ceffed',cap:'Welt entdecken'},
+  ]},
+  { tag:'🎨 Kunst', photos:[
+    {id:'1541961017774-22349e4a1262',cap:'Kreativität'},       {id:'1513364776144-60329b5e2071',cap:'Farben'},
+    {id:'1579965342575-16428a7c8881',cap:'Inspiration'},       {id:'1578301978693-85fa9c0320b9',cap:'Kunstwerk'},
+  ]},
+  { tag:'☕ Gemütlich', photos:[
+    {id:'1447933601652-ac27af53b5e5',cap:'Morgenkaffee'},      {id:'1512568400610-1099e5f58327',cap:'Cozy Vibes'},
+    {id:'1442975631115-3fd24e5b082a',cap:'Entspannen'},        {id:'1481931098730-318b6f776db0',cap:'Zuhause'},
+  ]},
+  { tag:'🐾 Tiere', photos:[
+    {id:'1474511320723-9a56873867b5',cap:'Fuchs'},             {id:'1425082661705-1834bfd09dca',cap:'Wildtier'},
+    {id:'1437622368342-7a3d73a46f21',cap:'Katze'},             {id:'1518717758536-85ae29035b6d',cap:'Hund'},
   ]},
 ];
 
@@ -8421,17 +8446,10 @@ function renderRecipe(offset) {
   document.getElementById('recipe-section').innerHTML = `
     <div class="card recipe-card">
       <div class="card-header">
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <div style="display:flex;gap:4px;">
-            <button onclick="showRecipeView()" style="background:${_recipeView==='recipe'?'#ff6b2b':'#fff3e8'};border:1.5px solid ${_recipeView==='recipe'?'#ff6b2b':'#f8c8a0'};border-radius:10px;padding:5px 12px;font-size:12px;font-weight:700;color:${_recipeView==='recipe'?'#fff':'#a05020'};cursor:pointer;">🍽️ Rezept des Tages</button>
-            <button onclick="showFavoritesView()" style="background:${_recipeView==='favorites'?'#ff6b2b':'#fff3e8'};border:1.5px solid ${_recipeView==='favorites'?'#ff6b2b':'#f8c8a0'};border-radius:10px;padding:5px 12px;font-size:12px;font-weight:700;color:${_recipeView==='favorites'?'#fff':'#a05020'};cursor:pointer;">Meine Favoriten</button>
-          </div>
-        </div>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <button class="share-btn" onclick="shareRecipeCanvas()">📸 Teilen</button>
-        </div>
+        <div class="card-title" style="margin:0;">🍽️ Rezept des Tages</div>
+        <button onclick="showFavoritesView()" style="background:${_recipeView==='favorites'?'#ff6b2b':'transparent'};border:1.5px solid ${_recipeView==='favorites'?'#ff6b2b':'#f8c8a0'};border-radius:10px;padding:5px 12px;font-size:12px;font-weight:700;color:${_recipeView==='favorites'?'#fff':'#a05020'};cursor:pointer;">⭐ Meine Favoriten</button>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:6px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;margin-top:10px;gap:6px;">
         <button onclick="haptic();renderRecipe(${_recipeOffset - 1})" style="background:#fff3e8;border:1.5px solid #f8c8a0;border-radius:12px;padding:8px 14px;font-size:18px;cursor:pointer;color:#a05020;font-weight:700;">←</button>
         <div style="display:flex;align-items:center;gap:5px;flex:1;justify-content:center;">
           <input id="recipe-num-input" type="number" min="1" max="${total}" value="${idx+1}"
@@ -8444,7 +8462,10 @@ function renderRecipe(offset) {
         <button onclick="haptic();renderRecipe(${_recipeOffset + 1})" style="background:#fff3e8;border:1.5px solid #f8c8a0;border-radius:12px;padding:8px 14px;font-size:18px;cursor:pointer;color:#a05020;font-weight:700;">→</button>
       </div>
       <span class="recipe-kcal-badge">${r.badge} · ${r.kcal} kcal</span>
-      <div class="recipe-name">${r.name} <span onclick="toggleFavRecipe()" style="font-size:14px;cursor:pointer;" title="Als Favorit speichern">${fav ? '⭐' : '☆'}</span></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <div class="recipe-name" style="margin-bottom:0;flex:1;">${r.name} <span onclick="toggleFavRecipe()" style="font-size:14px;cursor:pointer;" title="Als Favorit speichern">${fav ? '⭐' : '☆'}</span></div>
+        <button class="share-btn" onclick="shareRecipeCanvas()" style="flex-shrink:0;">📸 Teilen</button>
+      </div>
       <div class="recipe-macros">
         <span class="recipe-macro">🥩 ${r.protein}g Protein</span>
         <span class="recipe-macro">🫙 ${r.fat}g Fett</span>
@@ -8462,8 +8483,13 @@ function renderRecipe(offset) {
 let _recipeView = 'recipe'; // 'recipe' | 'favorites'
 function showFavoritesView() {
   haptic();
-  _recipeView = 'favorites';
-  renderFavoritesView();
+  if (_recipeView === 'favorites') {
+    _recipeView = 'recipe';
+    renderRecipe();
+  } else {
+    _recipeView = 'favorites';
+    renderFavoritesView();
+  }
 }
 function showRecipeView() {
   haptic();
@@ -8493,10 +8519,8 @@ function renderFavoritesView() {
   document.getElementById('recipe-section').innerHTML = `
     <div class="card recipe-card">
       <div class="card-header">
-        <div style="display:flex;gap:4px;">
-          <button onclick="showRecipeView()" style="background:#fff3e8;border:1.5px solid #f8c8a0;border-radius:10px;padding:5px 12px;font-size:12px;font-weight:700;color:#a05020;cursor:pointer;">🍽️ Rezept des Tages</button>
-          <button onclick="showFavoritesView()" style="background:#ff6b2b;border:1.5px solid #ff6b2b;border-radius:10px;padding:5px 12px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;">⭐ Meine Favoriten</button>
-        </div>
+        <div class="card-title" style="margin:0;">🍽️ Rezept des Tages</div>
+        <button onclick="showFavoritesView()" style="background:#ff6b2b;border:1.5px solid #ff6b2b;border-radius:10px;padding:5px 12px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;">✕ Schließen</button>
       </div>
       <div style="font-size:11px;color:#bbb;font-weight:600;margin:10px 0 12px;">${favs.length} ${favs.length===1?'Rezept':'Rezepte'} gespeichert</div>
       ${listHtml}
@@ -9387,46 +9411,46 @@ function renderMorningReflection() {
   if (saved) {
     const moodEmoji = moodEmojis[Math.min(saved.mood - 1, 9)];
     el.innerHTML = `
-      <div class="card" style="background:linear-gradient(135deg,#f0fff4,#e6ffee);border-color:#86efac;">
+      <div class="card" style="background:linear-gradient(135deg,#fffbf0,#fff8e8);border-color:#f0c060;">
         <div class="card-header">
-          <div class="card-title">🌸 Morgenreflexion</div>
+          <div class="card-title" style="color:#b06000;">✨ Morgenreflexion</div>
           <div style="display:flex;gap:6px;">
-            <button class="share-btn" onclick="editMorningReflection()">✏️ Bearbeiten</button>
-            <button class="share-btn" style="background:#fff0f0;color:#b91c1c;" onclick="localStorage.removeItem(getMorningReflectKey()); renderMorningReflection();">🗑️</button>
+            <button class="share-btn" onclick="editMorningReflection()" style="color:#b06000;border-color:#f0c060;">✏️ Bearbeiten</button>
+            <button class="share-btn" style="background:#fff4e8;color:#c0392b;border-color:#f0c060;" onclick="localStorage.removeItem(getMorningReflectKey()); renderMorningReflection();">🗑️</button>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:14px;">
-          <span style="font-size:42px;">${moodEmoji}</span>
+        <div style="display:flex;align-items:center;gap:14px;margin-top:4px;">
+          <span style="font-size:44px;line-height:1;">${moodEmoji}</span>
           <div>
-            <div style="font-size:15px;font-weight:700;color:#16a34a;">Stimmung: ${saved.mood}/10</div>
-            <div style="font-size:13px;color:#059669;margin-top:3px;">Dankbar für heute ✨</div>
+            <div style="font-size:15px;font-weight:700;color:#c07000;">Energie heute: ${saved.mood}/10</div>
+            <div style="font-size:13px;color:#a06000;margin-top:2px;">Dein Tag, deine Energie 🚀</div>
           </div>
         </div>
-        <div style="background:rgba(22,163,74,0.08);border-radius:12px;padding:10px 12px;margin-top:10px;border-left:3px solid #4ade80;">
-          <div style="font-size:11px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">🙏 Dankbar für</div>
-          <div style="font-size:13px;color:#15803d;line-height:1.55;">${saved.grateful}</div>
+        <div style="background:rgba(255,180,0,0.08);border-radius:12px;padding:10px 12px;margin-top:12px;border-left:3px solid #f0a000;">
+          <div style="font-size:10px;font-weight:700;color:#a06000;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:4px;">🙏 Dankbar für</div>
+          <div style="font-size:13px;color:#5a3800;line-height:1.6;">${saved.grateful}</div>
         </div>
-        ${saved.excited ? `<div style="background:rgba(251,191,36,0.1);border-radius:12px;padding:10px 12px;margin-top:8px;border-left:3px solid #fbbf24;"><div style="font-size:11px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">🌟 Freue mich auf</div><div style="font-size:13px;color:#92400e;line-height:1.55;">${saved.excited}</div></div>` : ''}
-        ${saved.happy ? `<div style="background:rgba(236,72,153,0.08);border-radius:12px;padding:10px 12px;margin-top:8px;border-left:3px solid #f9a8d4;"><div style="font-size:11px;font-weight:700;color:#db2777;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">💕 Macht mich glücklich</div><div style="font-size:13px;color:#9d174d;line-height:1.55;">${saved.happy}</div></div>` : ''}
+        ${saved.excited ? `<div style="background:rgba(255,140,0,0.08);border-radius:12px;padding:10px 12px;margin-top:8px;border-left:3px solid #ff8c00;"><div style="font-size:10px;font-weight:700;color:#a05000;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:4px;">🚀 Freue mich auf</div><div style="font-size:13px;color:#5a3000;line-height:1.6;">${saved.excited}</div></div>` : ''}
+        ${saved.happy ? `<div style="background:rgba(255,200,50,0.1);border-radius:12px;padding:10px 12px;margin-top:8px;border-left:3px solid #f0c030;"><div style="font-size:10px;font-weight:700;color:#806000;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:4px;">⚡ Macht mich glücklich</div><div style="font-size:13px;color:#5a3800;line-height:1.6;">${saved.happy}</div></div>` : ''}
       </div>`;
   } else {
     el.innerHTML = `
-      <div class="card" style="background:linear-gradient(135deg,#f0fff4,#e6ffee);border-color:#86efac;">
-        <div class="card-title">🌸 Morgenreflexion</div>
-        <div style="font-size:13px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Wie fühlst du dich gerade? (1–10)</div>
+      <div class="card" style="background:linear-gradient(135deg,#fffbf0,#fff8e8);border-color:#f0c060;">
+        <div class="card-title" style="color:#b06000;">✨ Morgenreflexion</div>
+        <div style="font-size:12px;font-weight:700;color:#a07000;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">Wie ist deine Energie gerade? (1–10)</div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-          <span style="font-size:13px;color:#9ca3af;">😰 1</span>
-          <input type="range" id="mr-mood" min="1" max="10" value="7" style="flex:1;accent-color:#16a34a;" oninput="document.getElementById('mr-mood-val').textContent=moodEmojis[Math.min(this.value-1,9)]+' '+this.value">
-          <span style="font-size:13px;color:#9ca3af;">10 🌟</span>
-          <span id="mr-mood-val" style="font-size:16px;font-weight:800;color:#16a34a;min-width:36px;">😄 7</span>
+          <span style="font-size:13px;color:#c0a060;">😴 1</span>
+          <input type="range" id="mr-mood" min="1" max="10" value="7" style="flex:1;accent-color:#f09000;" oninput="document.getElementById('mr-mood-val').textContent=moodEmojis[Math.min(this.value-1,9)]+' '+this.value">
+          <span style="font-size:13px;color:#c0a060;">10 🚀</span>
+          <span id="mr-mood-val" style="font-size:16px;font-weight:800;color:#d07000;min-width:36px;">😄 7</span>
         </div>
-        <div style="font-size:13px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">🙏 Wofür bin ich heute dankbar?</div>
-        <textarea id="mr-grateful" style="width:100%;background:rgba(255,255,255,0.8);border:1.5px solid #86efac;border-radius:12px;padding:10px 12px;font-size:14px;color:#15803d;outline:none;resize:none;font-family:inherit;line-height:1.5;" rows="3" placeholder="z.B. Kaffee am Morgen, Sonnenschein, Gesundheit..."></textarea>
-        <div style="font-size:13px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 6px;">🌟 Worauf freue ich mich heute?</div>
-        <textarea id="mr-excited" style="width:100%;background:rgba(255,255,255,0.8);border:1.5px solid #fbbf24;border-radius:12px;padding:10px 12px;font-size:14px;color:#92400e;outline:none;resize:none;font-family:inherit;line-height:1.5;" rows="2" placeholder="z.B. ein Treffen, ein Projekt, ein Moment..."></textarea>
-        <div style="font-size:13px;font-weight:700;color:#db2777;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 6px;">💕 Was macht mich jetzt glücklich?</div>
-        <textarea id="mr-happy" style="width:100%;background:rgba(255,255,255,0.8);border:1.5px solid #f9a8d4;border-radius:12px;padding:10px 12px;font-size:14px;color:#9d174d;outline:none;resize:none;font-family:inherit;line-height:1.5;" rows="2" placeholder="z.B. dieses Lied, der Morgen, mein Kaffee..."></textarea>
-        <button onclick="submitMorningReflection();haptic('medium');" style="width:100%;background:#16a34a;color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;">✨ Speichern & Tag starten</button>
+        <div style="font-size:12px;font-weight:700;color:#a07000;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">🙏 Wofür bin ich heute dankbar?</div>
+        <textarea id="mr-grateful" style="width:100%;background:rgba(255,255,255,0.85);border:1.5px solid #f0c060;border-radius:12px;padding:10px 12px;font-size:14px;color:#5a3800;outline:none;resize:none;font-family:inherit;line-height:1.5;min-height:80px;overflow:hidden;box-sizing:border-box;" rows="3" placeholder="z.B. Kaffee am Morgen, ein gutes Gespräch, der Sonnenschein..."></textarea>
+        <div style="font-size:12px;font-weight:700;color:#a07000;text-transform:uppercase;letter-spacing:0.6px;margin:10px 0 6px;">🚀 Worauf freue ich mich heute?</div>
+        <textarea id="mr-excited" style="width:100%;background:rgba(255,255,255,0.85);border:1.5px solid #f0c060;border-radius:12px;padding:10px 12px;font-size:14px;color:#5a3800;outline:none;resize:none;font-family:inherit;line-height:1.5;min-height:80px;overflow:hidden;box-sizing:border-box;" rows="3" placeholder="z.B. ein Treffen, ein Projekt, ein freier Moment..."></textarea>
+        <div style="font-size:12px;font-weight:700;color:#a07000;text-transform:uppercase;letter-spacing:0.6px;margin:10px 0 6px;">⚡ Was macht mich gerade glücklich?</div>
+        <textarea id="mr-happy" style="width:100%;background:rgba(255,255,255,0.85);border:1.5px solid #f0c060;border-radius:12px;padding:10px 12px;font-size:14px;color:#5a3800;outline:none;resize:none;font-family:inherit;line-height:1.5;min-height:80px;overflow:hidden;box-sizing:border-box;" rows="3" placeholder="z.B. gute Musik, dieser Moment, mein Kaffee..."></textarea>
+        <button onclick="submitMorningReflection();haptic('medium');" style="width:100%;background:linear-gradient(135deg,#f09000,#e07000);color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-top:12px;letter-spacing:0.2px;">🚀 Tag starten</button>
       </div>`;
     // Fix reference to moodEmojis inside inline oninput
     const moodInput = el.querySelector('#mr-mood');
@@ -9434,6 +9458,10 @@ function renderMorningReflection() {
     const emojis = ['😰','😟','😕','😐','🙂','😊','😄','🥰','🤩','🌟'];
     if (moodInput) moodInput.addEventListener('input', () => {
       moodVal.textContent = emojis[Math.min(parseInt(moodInput.value)-1,9)] + ' ' + moodInput.value;
+    });
+    // Auto-resize textareas
+    el.querySelectorAll('textarea').forEach(ta => {
+      ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; });
     });
   }
 }
@@ -9445,30 +9473,35 @@ function editMorningReflection() {
   if (!el) return;
   const emojis = ['😰','😟','😕','😐','🙂','😊','😄','🥰','🤩','🌟'];
   el.innerHTML = `
-    <div class="card" style="background:linear-gradient(135deg,#f0fff4,#e6ffee);border-color:#86efac;">
-      <div class="card-title">🌸 Morgenreflexion bearbeiten</div>
-      <div style="font-size:13px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Wie fühlst du dich gerade? (1–10)</div>
+    <div class="card" style="background:linear-gradient(135deg,#fffbf0,#fff8e8);border-color:#f0c060;">
+      <div class="card-title" style="color:#b06000;">✨ Morgenreflexion bearbeiten</div>
+      <div style="font-size:12px;font-weight:700;color:#a07000;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">Wie ist deine Energie gerade? (1–10)</div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-        <span style="font-size:13px;color:#9ca3af;">😰 1</span>
-        <input type="range" id="mr-mood" min="1" max="10" value="${saved.mood}" style="flex:1;accent-color:#16a34a;">
-        <span style="font-size:13px;color:#9ca3af;">10 🌟</span>
-        <span id="mr-mood-val" style="font-size:16px;font-weight:800;color:#16a34a;min-width:36px;">${emojis[Math.min(saved.mood-1,9)]} ${saved.mood}</span>
+        <span style="font-size:13px;color:#c0a060;">😴 1</span>
+        <input type="range" id="mr-mood" min="1" max="10" value="${saved.mood}" style="flex:1;accent-color:#f09000;">
+        <span style="font-size:13px;color:#c0a060;">10 🚀</span>
+        <span id="mr-mood-val" style="font-size:16px;font-weight:800;color:#d07000;min-width:36px;">${emojis[Math.min(saved.mood-1,9)]} ${saved.mood}</span>
       </div>
-      <div style="font-size:13px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">🙏 Wofür bin ich heute dankbar?</div>
-      <textarea id="mr-grateful" style="width:100%;background:rgba(255,255,255,0.8);border:1.5px solid #86efac;border-radius:12px;padding:10px 12px;font-size:14px;color:#15803d;outline:none;resize:none;font-family:inherit;line-height:1.5;" rows="3">${saved.grateful||''}</textarea>
-      <div style="font-size:13px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 6px;">🌟 Worauf freue ich mich heute?</div>
-      <textarea id="mr-excited" style="width:100%;background:rgba(255,255,255,0.8);border:1.5px solid #fbbf24;border-radius:12px;padding:10px 12px;font-size:14px;color:#92400e;outline:none;resize:none;font-family:inherit;line-height:1.5;" rows="2">${saved.excited||''}</textarea>
-      <div style="font-size:13px;font-weight:700;color:#db2777;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 6px;">💕 Was macht mich jetzt glücklich?</div>
-      <textarea id="mr-happy" style="width:100%;background:rgba(255,255,255,0.8);border:1.5px solid #f9a8d4;border-radius:12px;padding:10px 12px;font-size:14px;color:#9d174d;outline:none;resize:none;font-family:inherit;line-height:1.5;" rows="2">${saved.happy||''}</textarea>
-      <div style="display:flex;gap:8px;margin-top:10px;">
-        <button onclick="submitMorningReflection();haptic('medium');" style="flex:2;background:#16a34a;color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">💚 Speichern</button>
-        <button onclick="renderMorningReflection();" style="flex:1;background:#f0fdf4;color:#16a34a;border:1.5px solid #86efac;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">Abbrechen</button>
+      <div style="font-size:12px;font-weight:700;color:#a07000;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">🙏 Wofür bin ich heute dankbar?</div>
+      <textarea id="mr-grateful" style="width:100%;background:rgba(255,255,255,0.85);border:1.5px solid #f0c060;border-radius:12px;padding:10px 12px;font-size:14px;color:#5a3800;outline:none;resize:none;font-family:inherit;line-height:1.5;min-height:80px;overflow:hidden;box-sizing:border-box;" rows="3">${saved.grateful||''}</textarea>
+      <div style="font-size:12px;font-weight:700;color:#a07000;text-transform:uppercase;letter-spacing:0.6px;margin:10px 0 6px;">🚀 Worauf freue ich mich heute?</div>
+      <textarea id="mr-excited" style="width:100%;background:rgba(255,255,255,0.85);border:1.5px solid #f0c060;border-radius:12px;padding:10px 12px;font-size:14px;color:#5a3800;outline:none;resize:none;font-family:inherit;line-height:1.5;min-height:80px;overflow:hidden;box-sizing:border-box;" rows="3">${saved.excited||''}</textarea>
+      <div style="font-size:12px;font-weight:700;color:#a07000;text-transform:uppercase;letter-spacing:0.6px;margin:10px 0 6px;">⚡ Was macht mich gerade glücklich?</div>
+      <textarea id="mr-happy" style="width:100%;background:rgba(255,255,255,0.85);border:1.5px solid #f0c060;border-radius:12px;padding:10px 12px;font-size:14px;color:#5a3800;outline:none;resize:none;font-family:inherit;line-height:1.5;min-height:80px;overflow:hidden;box-sizing:border-box;" rows="3">${saved.happy||''}</textarea>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button onclick="submitMorningReflection();haptic('medium');" style="flex:2;background:linear-gradient(135deg,#f09000,#e07000);color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">🚀 Speichern</button>
+        <button onclick="renderMorningReflection();" style="flex:1;background:#fff8e8;color:#a07000;border:1.5px solid #f0c060;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">Abbrechen</button>
       </div>
     </div>`;
   const moodInput = el.querySelector('#mr-mood');
   const moodVal = el.querySelector('#mr-mood-val');
   if (moodInput) moodInput.addEventListener('input', () => {
     moodVal.textContent = emojis[Math.min(parseInt(moodInput.value)-1,9)] + ' ' + moodInput.value;
+  });
+  // Auto-resize textareas + pre-size existing content
+  el.querySelectorAll('textarea').forEach(ta => {
+    ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px';
+    ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; });
   });
 }
 
