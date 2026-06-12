@@ -1560,7 +1560,7 @@ function renderSummary() {
       <textarea id="reflect-hard" class="reflect-area" placeholder="Was hat dich heute herausgefordert?" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
       <div style="font-size:12px;font-weight:700;color:#3a6186;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 5px;">🙏 Wofür bin ich dankbar?</div>
       <textarea id="reflect-grateful" class="reflect-area" placeholder="3 kleine oder große Dinge..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
-      <button class="aidy-btn" style="margin-top:12px;background:linear-gradient(135deg,#3a6186,#5a8ab0);" onclick="submitReflection()">✓ Reflexion speichern</button>
+      <button class="aidy-btn" style="margin-top:12px;background:linear-gradient(135deg,#3a6186,#5a8ab0);" onclick="submitReflection()">✓ Speichern</button>
     </div>`;
 
   const reflectionContent = savedReflect ? (() => {
@@ -1622,7 +1622,6 @@ function renderSummary() {
       ${openTodosHtml}
     </div>
     <div class="summary-card" style="animation-delay:0.17s;background:linear-gradient(135deg,#f0f4f8,#e8eef5);border-color:#b0c4d8;">
-      <div class="summary-card-title" style="color:#2c4a6e;">🌿 Tagesreflexion</div>
       ${reflectionContent}
     </div>
     <div class="summary-card motivation-card" style="animation-delay:0.2s;background:linear-gradient(135deg,#1a1a2e,#16213e);border-color:#2d1b69;">
@@ -8909,13 +8908,13 @@ function openReflectionArchive() {
       return `
         <div style="border-radius:14px;border:1px solid var(--border);padding:14px;margin-bottom:10px;background:#fafafe;cursor:pointer;" onclick="toggleArchiveEntry('archive-entry-${i}')">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-            <div style="font-size:14px;font-weight:700;color:#5b21b6;">${label}</div>
+            <div style="font-size:14px;font-weight:700;color:#3a6186;">${label}</div>
             <div style="font-size:22px;">${moodEmoji} ${r.mood}/10</div>
           </div>
           <div id="archive-entry-${i}" style="display:none;margin-top:8px;">
             ${r.good?`<div style="background:rgba(22,163,74,0.07);border-radius:10px;padding:8px 10px;margin-bottom:6px;border-left:3px solid #86efac;"><div style="font-size:10px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Was gut war</div><div style="font-size:13px;">${escHtml(r.good)}</div></div>`:''}
             ${r.hard?`<div style="background:rgba(255,159,10,0.07);border-radius:10px;padding:8px 10px;margin-bottom:6px;border-left:3px solid #fcd34d;"><div style="font-size:10px;font-weight:700;color:#b45309;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Was schwierig war</div><div style="font-size:13px;">${escHtml(r.hard)}</div></div>`:''}
-            ${r.grateful?`<div style="background:rgba(124,58,237,0.07);border-radius:10px;padding:8px 10px;border-left:3px solid #c4b5fd;"><div style="font-size:10px;font-weight:700;color:#5b21b6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Dankbarkeit</div><div style="font-size:13px;">${escHtml(r.grateful)}</div></div>`:''}
+            ${r.grateful?`<div style="background:rgba(58,97,134,0.07);border-radius:10px;padding:8px 10px;border-left:3px solid #7aafd4;"><div style="font-size:10px;font-weight:700;color:#3a6186;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Dankbarkeit</div><div style="font-size:13px;">${escHtml(r.grateful)}</div></div>`:''}
           </div>
         </div>`;
     }).join('');
@@ -8925,7 +8924,7 @@ function openReflectionArchive() {
     <div style="background:#fff;border-radius:22px 22px 0 0;padding:20px 16px calc(env(safe-area-inset-bottom)+20px);max-height:85vh;display:flex;flex-direction:column;">
       <div style="width:36px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 16px;flex-shrink:0;"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-shrink:0;">
-        <div style="font-size:18px;font-weight:800;color:#5b21b6;">📚 Reflexions-Archiv</div>
+        <div style="font-size:18px;font-weight:800;color:#3a6186;">📚 Reflexions-Archiv</div>
         <div style="font-size:12px;color:#888;">${all.length} Einträge</div>
       </div>
       <div style="overflow-y:auto;flex:1;padding-right:4px;">${entriesHtml}</div>
