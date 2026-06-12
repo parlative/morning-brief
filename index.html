@@ -9384,51 +9384,57 @@ function renderMorningReflection() {
 
   const moodEmojis = ['😰','😟','😕','😐','🙂','😊','😄','🥰','🤩','🌟'];
 
+  // shared styles
+  const cardBg = 'background:linear-gradient(135deg,#fffbf4,#fdf4e0);border-color:#e0b84a;';
+  const labelStyle = 'font-size:11px;font-weight:800;color:#8a6010;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:4px;';
+  const blockStyle = (border) => `background:rgba(232,160,32,0.07);border-radius:12px;padding:10px 12px;margin-top:8px;border-left:3px solid ${border};`;
+
   if (saved) {
     const moodEmoji = moodEmojis[Math.min(saved.mood - 1, 9)];
     el.innerHTML = `
-      <div class="card" style="background:linear-gradient(135deg,#f0fff4,#e6ffee);border-color:#86efac;">
+      <div class="card" style="${cardBg}">
         <div class="card-header">
-          <div class="card-title">🌸 Morgenreflexion</div>
+          <div class="card-title" style="color:#7a5010;">✨ Morgenreflexion</div>
           <div style="display:flex;gap:6px;">
-            <button class="share-btn" onclick="editMorningReflection()">✏️ Bearbeiten</button>
-            <button class="share-btn" style="background:#fff0f0;color:#b91c1c;" onclick="localStorage.removeItem(getMorningReflectKey()); renderMorningReflection();">🗑️</button>
+            <button class="share-btn" style="border-color:#e0b84a;color:#8a6010;" onclick="editMorningReflection()">✏️ Bearbeiten</button>
+            <button class="share-btn" style="border-color:#e0b84a;color:#b91c1c;" onclick="localStorage.removeItem(getMorningReflectKey()); renderMorningReflection();">🗑️</button>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:14px;">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:4px;">
           <span style="font-size:42px;">${moodEmoji}</span>
           <div>
-            <div style="font-size:15px;font-weight:700;color:#16a34a;">Stimmung: ${saved.mood}/10</div>
-            <div style="font-size:13px;color:#059669;margin-top:3px;">Dankbar für heute ✨</div>
+            <div style="font-size:16px;font-weight:800;color:#c88010;">Stimmung: ${saved.mood}/10</div>
+            <div style="font-size:13px;color:#a07030;margin-top:2px;">Heute wird ein guter Tag 🚀</div>
           </div>
         </div>
-        <div style="background:rgba(22,163,74,0.08);border-radius:12px;padding:10px 12px;margin-top:10px;border-left:3px solid #4ade80;">
-          <div style="font-size:11px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">🙏 Dankbar für</div>
-          <div style="font-size:13px;color:#15803d;line-height:1.55;">${saved.grateful}</div>
+        <div style="${blockStyle('#e8a020')}">
+          <div style="${labelStyle}">🙏 Dankbar für</div>
+          <div style="font-size:13px;color:#5a3808;line-height:1.55;">${saved.grateful}</div>
         </div>
-        ${saved.excited ? `<div style="background:rgba(251,191,36,0.1);border-radius:12px;padding:10px 12px;margin-top:8px;border-left:3px solid #fbbf24;"><div style="font-size:11px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">🌟 Freue mich auf</div><div style="font-size:13px;color:#92400e;line-height:1.55;">${saved.excited}</div></div>` : ''}
-        ${saved.happy ? `<div style="background:rgba(236,72,153,0.08);border-radius:12px;padding:10px 12px;margin-top:8px;border-left:3px solid #f9a8d4;"><div style="font-size:11px;font-weight:700;color:#db2777;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">💕 Macht mich glücklich</div><div style="font-size:13px;color:#9d174d;line-height:1.55;">${saved.happy}</div></div>` : ''}
+        ${saved.excited ? `<div style="${blockStyle('#d4a017')}"><div style="${labelStyle}">🚀 Freue mich auf</div><div style="font-size:13px;color:#5a3808;line-height:1.55;">${saved.excited}</div></div>` : ''}
+        ${saved.happy ? `<div style="${blockStyle('#c89010')}"><div style="${labelStyle}">⚡ Macht mich glücklich</div><div style="font-size:13px;color:#5a3808;line-height:1.55;">${saved.happy}</div></div>` : ''}
       </div>`;
   } else {
+    const taStyle = 'width:100%;background:rgba(255,255,255,0.85);border:1.5px solid #e0b84a;border-radius:12px;padding:10px 12px;font-size:14px;color:#5a3808;outline:none;resize:none;font-family:inherit;line-height:1.5;';
+    const lblStyle = 'font-size:13px;font-weight:700;color:#8a6010;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 6px;';
     el.innerHTML = `
-      <div class="card" style="background:linear-gradient(135deg,#f0fff4,#e6ffee);border-color:#86efac;">
-        <div class="card-title">🌸 Morgenreflexion</div>
-        <div style="font-size:13px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Wie fühlst du dich gerade? (1–10)</div>
+      <div class="card" style="${cardBg}">
+        <div class="card-title" style="color:#7a5010;">✨ Morgenreflexion</div>
+        <div style="${lblStyle}">Stimmung heute (1–10)</div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-          <span style="font-size:13px;color:#9ca3af;">😰 1</span>
-          <input type="range" id="mr-mood" min="1" max="10" value="7" style="flex:1;accent-color:#16a34a;" oninput="document.getElementById('mr-mood-val').textContent=moodEmojis[Math.min(this.value-1,9)]+' '+this.value">
-          <span style="font-size:13px;color:#9ca3af;">10 🌟</span>
-          <span id="mr-mood-val" style="font-size:16px;font-weight:800;color:#16a34a;min-width:36px;">😄 7</span>
+          <span style="font-size:13px;color:#a07030;">😰 1</span>
+          <input type="range" id="mr-mood" min="1" max="10" value="7" style="flex:1;accent-color:#e8a020;">
+          <span style="font-size:13px;color:#a07030;">10 🌟</span>
+          <span id="mr-mood-val" style="font-size:16px;font-weight:800;color:#c88010;min-width:36px;">😄 7</span>
         </div>
-        <div style="font-size:13px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">🙏 Wofür bin ich heute dankbar?</div>
-        <textarea id="mr-grateful" style="width:100%;background:rgba(255,255,255,0.8);border:1.5px solid #86efac;border-radius:12px;padding:10px 12px;font-size:14px;color:#15803d;outline:none;resize:none;font-family:inherit;line-height:1.5;" rows="3" placeholder="z.B. Kaffee am Morgen, Sonnenschein, Gesundheit..."></textarea>
-        <div style="font-size:13px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 6px;">🌟 Worauf freue ich mich heute?</div>
-        <textarea id="mr-excited" style="width:100%;background:rgba(255,255,255,0.8);border:1.5px solid #fbbf24;border-radius:12px;padding:10px 12px;font-size:14px;color:#92400e;outline:none;resize:none;font-family:inherit;line-height:1.5;" rows="2" placeholder="z.B. ein Treffen, ein Projekt, ein Moment..."></textarea>
-        <div style="font-size:13px;font-weight:700;color:#db2777;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 6px;">💕 Was macht mich jetzt glücklich?</div>
-        <textarea id="mr-happy" style="width:100%;background:rgba(255,255,255,0.8);border:1.5px solid #f9a8d4;border-radius:12px;padding:10px 12px;font-size:14px;color:#9d174d;outline:none;resize:none;font-family:inherit;line-height:1.5;" rows="2" placeholder="z.B. dieses Lied, der Morgen, mein Kaffee..."></textarea>
-        <button onclick="submitMorningReflection();haptic('medium');" style="width:100%;background:#16a34a;color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;">✨ Speichern & Tag starten</button>
+        <div style="${lblStyle}">🙏 Wofür bin ich heute dankbar?</div>
+        <textarea id="mr-grateful" style="${taStyle}" rows="3" placeholder="z.B. Kaffee am Morgen, Sonnenschein, Gesundheit..."></textarea>
+        <div style="${lblStyle}">🚀 Worauf freue ich mich heute?</div>
+        <textarea id="mr-excited" style="${taStyle}" rows="2" placeholder="z.B. ein Treffen, ein Projekt, ein Moment..."></textarea>
+        <div style="${lblStyle}">⚡ Was macht mich jetzt glücklich?</div>
+        <textarea id="mr-happy" style="${taStyle}" rows="2" placeholder="z.B. dieses Lied, der Morgen, mein Kaffee..."></textarea>
+        <button onclick="submitMorningReflection();haptic('medium');" style="width:100%;background:linear-gradient(135deg,#e8a020,#c88010);color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;margin-top:12px;">✨ Speichern & Tag starten</button>
       </div>`;
-    // Fix reference to moodEmojis inside inline oninput
     const moodInput = el.querySelector('#mr-mood');
     const moodVal = el.querySelector('#mr-mood-val');
     const emojis = ['😰','😟','😕','😐','🙂','😊','😄','🥰','🤩','🌟'];
@@ -9444,25 +9450,28 @@ function editMorningReflection() {
   const el = document.getElementById('morning-reflection-section');
   if (!el) return;
   const emojis = ['😰','😟','😕','😐','🙂','😊','😄','🥰','🤩','🌟'];
+  const cardBg = 'background:linear-gradient(135deg,#fffbf4,#fdf4e0);border-color:#e0b84a;';
+  const taStyle = 'width:100%;background:rgba(255,255,255,0.85);border:1.5px solid #e0b84a;border-radius:12px;padding:10px 12px;font-size:14px;color:#5a3808;outline:none;resize:none;font-family:inherit;line-height:1.5;';
+  const lblStyle = 'font-size:13px;font-weight:700;color:#8a6010;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 6px;';
   el.innerHTML = `
-    <div class="card" style="background:linear-gradient(135deg,#f0fff4,#e6ffee);border-color:#86efac;">
-      <div class="card-title">🌸 Morgenreflexion bearbeiten</div>
-      <div style="font-size:13px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Wie fühlst du dich gerade? (1–10)</div>
+    <div class="card" style="${cardBg}">
+      <div class="card-title" style="color:#7a5010;">✨ Morgenreflexion bearbeiten</div>
+      <div style="${lblStyle}">Stimmung heute (1–10)</div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-        <span style="font-size:13px;color:#9ca3af;">😰 1</span>
-        <input type="range" id="mr-mood" min="1" max="10" value="${saved.mood}" style="flex:1;accent-color:#16a34a;">
-        <span style="font-size:13px;color:#9ca3af;">10 🌟</span>
-        <span id="mr-mood-val" style="font-size:16px;font-weight:800;color:#16a34a;min-width:36px;">${emojis[Math.min(saved.mood-1,9)]} ${saved.mood}</span>
+        <span style="font-size:13px;color:#a07030;">😰 1</span>
+        <input type="range" id="mr-mood" min="1" max="10" value="${saved.mood}" style="flex:1;accent-color:#e8a020;">
+        <span style="font-size:13px;color:#a07030;">10 🌟</span>
+        <span id="mr-mood-val" style="font-size:16px;font-weight:800;color:#c88010;min-width:36px;">${emojis[Math.min(saved.mood-1,9)]} ${saved.mood}</span>
       </div>
-      <div style="font-size:13px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">🙏 Wofür bin ich heute dankbar?</div>
-      <textarea id="mr-grateful" style="width:100%;background:rgba(255,255,255,0.8);border:1.5px solid #86efac;border-radius:12px;padding:10px 12px;font-size:14px;color:#15803d;outline:none;resize:none;font-family:inherit;line-height:1.5;" rows="3">${saved.grateful||''}</textarea>
-      <div style="font-size:13px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 6px;">🌟 Worauf freue ich mich heute?</div>
-      <textarea id="mr-excited" style="width:100%;background:rgba(255,255,255,0.8);border:1.5px solid #fbbf24;border-radius:12px;padding:10px 12px;font-size:14px;color:#92400e;outline:none;resize:none;font-family:inherit;line-height:1.5;" rows="2">${saved.excited||''}</textarea>
-      <div style="font-size:13px;font-weight:700;color:#db2777;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 6px;">💕 Was macht mich jetzt glücklich?</div>
-      <textarea id="mr-happy" style="width:100%;background:rgba(255,255,255,0.8);border:1.5px solid #f9a8d4;border-radius:12px;padding:10px 12px;font-size:14px;color:#9d174d;outline:none;resize:none;font-family:inherit;line-height:1.5;" rows="2">${saved.happy||''}</textarea>
-      <div style="display:flex;gap:8px;margin-top:10px;">
-        <button onclick="submitMorningReflection();haptic('medium');" style="flex:2;background:#16a34a;color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">💚 Speichern</button>
-        <button onclick="renderMorningReflection();" style="flex:1;background:#f0fdf4;color:#16a34a;border:1.5px solid #86efac;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">Abbrechen</button>
+      <div style="${lblStyle}">🙏 Wofür bin ich heute dankbar?</div>
+      <textarea id="mr-grateful" style="${taStyle}" rows="3">${saved.grateful||''}</textarea>
+      <div style="${lblStyle}">🚀 Worauf freue ich mich heute?</div>
+      <textarea id="mr-excited" style="${taStyle}" rows="2">${saved.excited||''}</textarea>
+      <div style="${lblStyle}">⚡ Was macht mich jetzt glücklich?</div>
+      <textarea id="mr-happy" style="${taStyle}" rows="2">${saved.happy||''}</textarea>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button onclick="submitMorningReflection();haptic('medium');" style="flex:2;background:linear-gradient(135deg,#e8a020,#c88010);color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">✨ Speichern</button>
+        <button onclick="renderMorningReflection();" style="flex:1;background:#fdf4e0;color:#8a6010;border:1.5px solid #e0b84a;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">Abbrechen</button>
       </div>
     </div>`;
   const moodInput = el.querySelector('#mr-mood');
