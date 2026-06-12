@@ -1,6 +1,6 @@
 // Service Worker — Maya's Morning Brief
-const CACHE_NAME = 'maya-brief-v10';
-const DATA_CACHE = 'maya-data-v10';
+const CACHE_NAME = 'maya-brief-v11';
+const DATA_CACHE = 'maya-data-v11';
 
 // Install: skip waiting immediately
 self.addEventListener('install', e => {
