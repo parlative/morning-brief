@@ -20,7 +20,7 @@
       --subtext: #6e6e73;
       --accent: #ff9f0a;
       --accent2: #30d158;
-      --accent3: #0a84ff;
+      --accent3: #3b6ea5;
       --accent4: #ff375f;
       --border: #e5e5ea;
       --shadow: 0 2px 14px rgba(0,0,0,0.07);
@@ -80,8 +80,8 @@
       top: 0; left: 0; right: 0;
       z-index: 90;
       background: linear-gradient(160deg, #fff8ec 0%, #fffdf5 60%, #f0f8ff 100%);
-      padding: 14px 14px 16px;
-      padding-top: max(env(safe-area-inset-top), 14px);
+      padding: 36px 20px 24px;
+      padding-top: max(env(safe-area-inset-top), 36px);
       text-align: center;
       border-bottom: 0.5px solid var(--border);
       backdrop-filter: saturate(180%) blur(10px);
@@ -94,8 +94,8 @@
       font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
       color: #c0a060; margin-bottom: 6px; font-weight: 600;
     }
-    .greeting { font-size: 26px; font-weight: 700; letter-spacing: -0.3px; color: var(--text); line-height: 1.2; }
-    .greeting .sun { display: inline-block; animation: sway 4s ease-in-out infinite; }
+    .greeting { font-size: 26px; font-weight: 700; letter-spacing: -0.3px; color: var(--text); line-height: 1.2; display:flex;flex-direction:column;align-items:center;gap:2px; }
+    .greeting .sun { display: block; font-size:28px; animation: sway 4s ease-in-out infinite; }
     @keyframes sway { 0%,100%{transform:rotate(-8deg)} 50%{transform:rotate(8deg)} }
     .date-line { font-size: 15px; color: var(--subtext); margin-top: 5px; font-weight: 500; }
     .last-update-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px; }
@@ -413,40 +413,40 @@
     .evening-locked-time { font-size: 28px; font-weight: 800; color: var(--text); margin: 8px 0; }
 
     /* ── Aidy Page ── */
-    .aidy-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 15px; margin-bottom: 10px; border: 1px solid var(--border); animation: fadeSlideUp 0.4s ease both; }
-    .aidy-card.purple { background: var(--card); border-color: var(--border); }
-    .aidy-card.green  { background: var(--card); border-color: var(--border); }
-    .aidy-card.blue   { background: var(--card); border-color: var(--border); }
-    .aidy-card.pink   { background: var(--card); border-color: var(--border); }
-    .aidy-card.amber  { background: var(--card); border-color: var(--border); }
-    .aidy-card.teal   { background: var(--card); border-color: var(--border); }
-    .aidy-title { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-    .aidy-sub   { font-size: 13px; color: var(--subtext); line-height: 1.5; margin-bottom: 12px; }
+    .aidy-card { background: #fdf8f0; border-radius: var(--radius); box-shadow: 0 1px 6px rgba(184,144,106,0.08); padding: 15px; margin-bottom: 10px; border: 1px solid #e8d9c8; animation: fadeSlideUp 0.4s ease both; }
+    .aidy-card.purple { background: #fdf8f0; border-color: #e8d9c8; }
+    .aidy-card.green  { background: #fdf8f0; border-color: #e8d9c8; }
+    .aidy-card.blue   { background: #fdf8f0; border-color: #e8d9c8; }
+    .aidy-card.pink   { background: #fdf8f0; border-color: #e8d9c8; }
+    .aidy-card.amber  { background: #fdf8f0; border-color: #e8d9c8; }
+    .aidy-card.teal   { background: #fdf8f0; border-color: #e8d9c8; }
+    .aidy-title { font-size: 17px; font-weight: 700; color: #3d2b1f; margin-bottom: 6px; }
+    .aidy-sub   { font-size: 13px; color: #8c7060; line-height: 1.5; margin-bottom: 12px; }
 
     /* Breath animation */
     @keyframes breatheIn  { 0%{transform:scale(0.7);opacity:0.5} 100%{transform:scale(1.15);opacity:1} }
     @keyframes breatheOut { 0%{transform:scale(1.15);opacity:1} 100%{transform:scale(0.7);opacity:0.5} }
     @keyframes breatheHold{ 0%,100%{transform:scale(1.15)} }
-    .breath-circle { width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,#334155,#1e293b); display:flex;align-items:center;justify-content:center;margin:0 auto 16px;cursor:pointer;transition:transform 0.3s; }
+    .breath-circle { width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,#e0b98a,#d4a574); display:flex;align-items:center;justify-content:center;margin:0 auto 16px;cursor:pointer;transition:transform 0.3s; }
     .breath-circle.in   { animation: breatheIn  4s ease-in-out forwards; }
     .breath-circle.hold { animation: breatheHold 7s ease forwards; }
     .breath-circle.out  { animation: breatheOut  8s ease-in-out forwards; }
     .breath-text { color:#fff;font-size:15px;font-weight:700;text-align:center;line-height:1.3; }
 
     /* Grounding steps */
-    .grounding-step { display:flex;align-items:flex-start;gap:12px;padding:10px;background:rgba(255,255,255,0.6);border-radius:13px;margin-bottom:8px;cursor:pointer;transition:background 0.2s; }
-    .grounding-step.done { background:rgba(51,65,85,0.08);border:1px solid #94a3b8; }
-    .grounding-num { width:32px;height:32px;border-radius:50%;background:#334155;color:#fff;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
-    .grounding-step.done .grounding-num { background:#475569; }
+    .grounding-step { display:flex;align-items:flex-start;gap:12px;padding:10px;background:#faf4ea;border-radius:13px;margin-bottom:8px;cursor:pointer;transition:background 0.2s; }
+    .grounding-step.done { background:#f0e6d4;border:1px solid #d4b896; }
+    .grounding-num { width:32px;height:32px;border-radius:50%;background:#d4a574;color:#fff;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .grounding-step.done .grounding-num { background:#b8845a; }
 
     /* Reflection textarea */
-    .reflect-area { width:100%;background:rgba(255,255,255,0.7);border:1.5px solid #cbd5e1;border-radius:13px;padding:10px 12px;font-size:14px;color:var(--text);outline:none;resize:none;font-family:inherit;line-height:1.5; }
-    .reflect-area:focus { border-color:#475569;box-shadow:0 0 0 3px rgba(71,85,105,0.1); }
-    .aidy-btn { background:#1e293b;color:#fff;border:none;border-radius:13px;padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;transition:transform 0.1s,opacity 0.15s;width:100%;margin-top:8px; }
+    .reflect-area { width:100%;background:#faf4ea;border:1.5px solid #d4b896;border-radius:13px;padding:10px 12px;font-size:14px;color:#3d2b1f;outline:none;resize:none;font-family:inherit;line-height:1.5;overflow:hidden;box-sizing:border-box;min-height:80px; }
+    .reflect-area:focus { border-color:#d4a574;box-shadow:0 0 0 3px rgba(184,144,106,0.12); }
+    .aidy-btn { background:#d4a574;color:#fff;border:none;border-radius:13px;padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;transition:transform 0.1s,opacity 0.15s;width:100%;margin-top:8px; }
     .aidy-btn:active { transform:scale(0.97);opacity:0.85; }
-    .aidy-btn.secondary { background:#f1f5f9;color:#334155;border:1.5px solid #cbd5e1; }
-    .panic-fact { background:rgba(255,255,255,0.6);border-radius:13px;padding:12px 14px;margin-bottom:8px;font-size:14px;color:#1e293b;font-weight:500;line-height:1.5;border-left:4px solid #334155; }
-    .affirmation { font-size:20px;font-weight:700;color:#1e293b;text-align:center;line-height:1.4;padding:16px 8px; }
+    .aidy-btn.secondary { background:#f5ece0;color:#8c6040;border:1.5px solid #d4b896; }
+    .panic-fact { background:#faf4ea;border-radius:13px;padding:12px 14px;margin-bottom:8px;font-size:14px;color:#3d2b1f;font-weight:500;line-height:1.5;border-left:4px solid #e0b98a; }
+    .affirmation { font-size:20px;font-weight:700;color:#3d2b1f;text-align:center;line-height:1.4;padding:16px 8px; }
     .sleep-rec { display:flex;gap:12px;align-items:center;flex-wrap:wrap; }
     .sleep-pill { flex:1;min-width:80px;background:rgba(255,255,255,0.7);border-radius:13px;padding:10px 12px;text-align:center;border:1px solid #bde0fe; }
     .sleep-pill-label { font-size:10px;color:var(--subtext);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px; }
@@ -459,7 +459,7 @@
 <div id="page-today" class="page active">
   <div class="header">
     <div class="header-deco">✨ Dein persönlicher Überblick ✨</div>
-    <div id="greeting" class="greeting">Good Morning, Maya <span class="sun">☀️</span></div>
+    <div id="greeting" class="greeting"><span class="sun">☀️</span>Guten Morgen, Maya</div>
     <div id="date-line" class="date-line"></div>
     <div class="last-update-row">
       <span id="last-update" class="last-update"></span>
@@ -516,9 +516,10 @@
 <div id="page-evening" class="page">
   <div class="summary-header" style="position:sticky;top:0;z-index:90;padding-top:max(env(safe-area-inset-top),48px);">
     <div class="summary-stars">⭐ ✨ 🌙</div>
-    <div class="summary-title">Evening Summary</div>
+    <div class="summary-title">Abend-Zusammenfassung</div>
     <div id="summary-date" class="summary-sub"></div>
-    <div style="margin-top:8px;">
+    <div style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <span id="evening-last-update" style="font-size:11px;color:rgba(255,255,255,0.55);"></span>
       <button onclick="haptic('medium'); renderSummary();" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;" id="evening-refresh-btn">↻</button>
     </div>
   </div>
@@ -540,7 +541,7 @@
 
 <!-- ═══ PAGE 3: AIDY ═══ -->
 <div id="page-aidy" class="page">
-  <div class="summary-header" style="position:sticky;top:0;z-index:90;background:linear-gradient(160deg,#1a1035,#2d1b69,#1a1035);padding-top:max(env(safe-area-inset-top),48px);">
+  <div class="summary-header" style="position:sticky;top:0;z-index:90;background:linear-gradient(160deg,#1a2a3a,#2c4a6e,#1a2a3a);padding-top:max(env(safe-area-inset-top),48px);">
     <div class="summary-stars" style="font-size:24px;letter-spacing:6px;">🫶</div>
     <div class="summary-title" style="font-size:22px;">Aidy</div>
     <div class="summary-sub" style="color:rgba(255,255,255,0.7);font-size:13px;">Du bist sicher. Du bist stark. Das geht vorbei.</div>
@@ -702,9 +703,11 @@ function adjustHeaderSpacer() {
 function updateGreeting() {
   const h = new Date().getHours();
   let text, emoji;
-  if (h < 10)  { text = "Good Morning, Maya"; emoji = "☀️"; }
-  else         { text = "Hello, Maya"; emoji = h < 18 ? "👋" : "🌙"; }
-  document.getElementById('greeting').innerHTML = `${text} <span class="sun">${emoji}</span>`;
+  if (h < 10)  { text = "Guten Morgen, Maya"; emoji = "☀️"; }
+  else if (h < 12) { text = "Guten Morgen, Maya"; emoji = "☀️"; }
+  else if (h < 18) { text = "Hallo, Maya"; emoji = "👋"; }
+  else             { text = "Gute Nacht, Maya"; emoji = "🌙"; }
+  document.getElementById('greeting').innerHTML = `<span class="sun">${emoji}</span>${text}`;
   const now = new Date();
   const days = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
   const months = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
@@ -1459,7 +1462,9 @@ function renderSummary() {
   const days=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
   const months=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
   document.getElementById('summary-date').textContent=
-    `${days[now.getDay()]}, ${now.getDate()}. ${months[now.getMonth()]} ${now.getFullYear()}`;
+    `📅 ${days[now.getDay()]}, ${now.getDate()}. ${months[now.getMonth()]} ${now.getFullYear()}`;
+  document.getElementById('evening-last-update').textContent=
+    `Zuletzt aktualisiert: ${now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr`;
 
   // ── NIE GESPERRT: Vor 20 Uhr wird der gespeicherte Vortags-Snapshot gezeigt ──
   const EVENING_SNAP_KEY = 'maya_evening_snapshot';
@@ -1551,11 +1556,11 @@ function renderSummary() {
         <span id="mood-val" style="font-size:16px;font-weight:800;color:#5b21b6;min-width:20px;">7</span>
       </div>
       <div style="font-size:12px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">✅ Was war heute gut?</div>
-      <textarea id="reflect-good" class="reflect-area" rows="2" placeholder="z.B. gutes Gespräch, Sport gemacht, lecker gegessen..."></textarea>
+      <textarea id="reflect-good" class="reflect-area" placeholder="z.B. gutes Gespräch, Sport gemacht, lecker gegessen..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
       <div style="font-size:12px;font-weight:700;color:#b45309;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 5px;">💪 Was war schwierig?</div>
-      <textarea id="reflect-hard" class="reflect-area" rows="2" placeholder="Was hat dich heute herausgefordert?"></textarea>
+      <textarea id="reflect-hard" class="reflect-area" placeholder="Was hat dich heute herausgefordert?" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
       <div style="font-size:12px;font-weight:700;color:#5b21b6;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 5px;">🙏 Wofür bin ich dankbar?</div>
-      <textarea id="reflect-grateful" class="reflect-area" rows="2" placeholder="3 kleine oder große Dinge..."></textarea>
+      <textarea id="reflect-grateful" class="reflect-area" placeholder="3 kleine oder große Dinge..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
       <button class="aidy-btn" style="margin-top:12px;" onclick="submitReflection()">💜 Reflexion speichern</button>
     </div>`;
 
@@ -2183,7 +2188,7 @@ const photoCurated = [
 
 async function loadPhotos() {
   const doy = getDailyIndex(999);
-  const cats = [0,1,2].map(i => photoCurated[(doy + i * 2) % photoCurated.length]);
+  const cats = [0,1,2].map(i => photoCurated[(doy + i) % photoCurated.length]);
 
   // Fotos direkt komplett rendern — kein zweistufiger Ansatz mehr
   const galleryHtml = cats.map((cat, i) => {
@@ -9041,11 +9046,11 @@ function renderAidy() {
   document.getElementById('aidy-content').innerHTML = `
 
     <!-- SOS Banner -->
-    <div style="background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:18px;padding:16px;margin-bottom:10px;text-align:center;animation:fadeSlideUp 0.3s ease;">
-      <div style="font-size:28px;margin-bottom:8px;">🆘</div>
+    <div style="background:linear-gradient(135deg,#b8845a,#d4a574);border-radius:18px;padding:16px;margin-bottom:10px;text-align:center;animation:fadeSlideUp 0.3s ease;">
+      <div style="font-size:28px;margin-bottom:8px;">🫁</div>
       <div style="color:#fff;font-size:17px;font-weight:700;margin-bottom:4px;">Panikattacke jetzt?</div>
-      <div style="color:rgba(255,255,255,0.65);font-size:13px;margin-bottom:12px;">Starte die geführte Atemübung — sofortige Wirkung</div>
-      <button onclick="startBreathing()" style="background:#fff;color:#1e293b;border:none;border-radius:14px;padding:12px 28px;font-size:15px;font-weight:800;cursor:pointer;width:100%;">Jetzt atmen →</button>
+      <div style="color:rgba(255,255,255,0.85);font-size:13px;margin-bottom:12px;">Starte die geführte Atemübung — sofortige Wirkung</div>
+      <button onclick="startBreathing()" style="background:#fdf8f0;color:#b8845a;border:none;border-radius:14px;padding:12px 28px;font-size:15px;font-weight:800;cursor:pointer;width:100%;">Jetzt atmen →</button>
     </div>
 
     <!-- Atemübung -->
@@ -9056,7 +9061,7 @@ function renderAidy() {
         <div class="breath-text" id="breath-label">Tippe<br>zum Start</div>
       </div>
       <div style="text-align:center;margin-bottom:12px;">
-        <div id="breath-phase-text" style="font-size:20px;font-weight:800;color:#1e293b;">Bereit</div>
+        <div id="breath-phase-text" style="font-size:20px;font-weight:800;color:#b8845a;">Bereit</div>
         <div id="breath-count-text" style="font-size:13px;color:#6b7280;margin-top:2px;"></div>
       </div>
       <button class="aidy-btn secondary" onclick="stopBreathing()">✕ Stoppen</button>
@@ -9099,9 +9104,9 @@ function renderAidy() {
       <div class="aidy-sub">Spanne jeden Körperbereich für 5 Sekunden an, dann loslassen.</div>
       <div id="bodyscan-steps">
         ${['Füße & Zehen 🦶','Waden & Unterschenkel 🦵','Oberschenkel & Gesäß','Bauch & Rücken','Hände & Arme 🤲','Schultern & Nacken 💪','Gesicht & Kiefer 😌'].map((area,i)=>`
-          <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(100,116,139,0.15);cursor:pointer;" onclick="haptic();this.style.opacity=this.style.opacity=='0.4'?'1':'0.4';this.querySelector('.bs-check').style.display=this.style.opacity=='0.4'?'flex':'none'">
-            <div class="bs-check" style="display:none;width:22px;height:22px;border-radius:50%;background:#334155;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:13px;font-weight:800;">✓</div>
-            <div style="width:22px;height:22px;border-radius:50%;border:2px solid #94a3b8;flex-shrink:0;"></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(184,144,106,0.15);cursor:pointer;" onclick="haptic();this.style.opacity=this.style.opacity=='0.4'?'1':'0.4';this.querySelector('.bs-check').style.display=this.style.opacity=='0.4'?'flex':'none'">
+            <div class="bs-check" style="display:none;width:22px;height:22px;border-radius:50%;background:#d4a574;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:13px;font-weight:800;">✓</div>
+            <div style="width:22px;height:22px;border-radius:50%;border:2px solid #d4b896;flex-shrink:0;"></div>
             <span style="font-size:14px;font-weight:500;color:var(--text);">${area}</span>
           </div>`).join('')}
       </div>
@@ -9112,54 +9117,54 @@ function renderAidy() {
       <div class="aidy-title">💧 Kälte-Reset</div>
       <div class="aidy-sub">Kaltes Wasser aktiviert den Taucherreflex — das Nervensystem schaltet sofort um.</div>
       <div style="background:rgba(255,255,255,0.6);border-radius:13px;padding:12px 14px;margin-bottom:10px;">
-        <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:6px;">So geht's:</div>
-        <div style="font-size:13px;color:#475569;line-height:1.6;">
+        <div style="font-size:14px;font-weight:700;color:#3d2b1f;margin-bottom:6px;">So geht's:</div>
+        <div style="font-size:13px;color:#8c7060;line-height:1.6;">
           1. Kaltes Wasser bereitstellen<br>
           2. Tief einatmen<br>
           3. Gesicht 30 Sek. ins kalte Wasser tauchen (oder Eiswürfel halten)<br>
           4. Oder: Eiswürfel am Handgelenk / Nacken
         </div>
       </div>
-      <div style="font-size:12px;color:#64748b;text-align:center;">Wirkt innerhalb von 30 Sekunden · Medizinisch belegt</div>
+      <div style="font-size:12px;color:#8c7060;text-align:center;">Wirkt innerhalb von 30 Sekunden · Medizinisch belegt</div>
     </div>
 
     <!-- Kontakte -->
     <div class="aidy-card" style="padding:18px;">
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.9px;color:var(--subtext);margin-bottom:14px;">Deine Menschen</div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.9px;color:#8c7060;margin-bottom:14px;">Deine Menschen</div>
 
       <!-- Mama -->
-      <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:16px;padding:14px 16px;margin-bottom:10px;">
+      <div style="background:#faf4ea;border:1.5px solid #e8d9c8;border-radius:16px;padding:14px 16px;margin-bottom:10px;">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-          <div style="width:44px;height:44px;border-radius:50%;background:#334155;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">👩</div>
+          <div style="width:44px;height:44px;border-radius:50%;background:#d4b896;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">👩</div>
           <div>
-            <div style="font-size:17px;font-weight:700;color:#1e293b;">Mama</div>
-            <div style="font-size:12px;color:#64748b;">+49 175 2230310</div>
+            <div style="font-size:17px;font-weight:700;color:#3d2b1f;">Mama</div>
+            <div style="font-size:12px;color:#8c7060;">+49 175 2230310</div>
           </div>
         </div>
         <div style="display:flex;gap:8px;">
-          <a href="tel:+491752230310" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;background:#1e293b;color:#fff;border-radius:12px;padding:11px 8px;font-size:14px;font-weight:700;text-decoration:none;transition:opacity 0.15s;" onclick="haptic('medium')">
+          <a href="tel:+491752230310" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;background:#d4a574;color:#fff;border-radius:12px;padding:11px 8px;font-size:14px;font-weight:700;text-decoration:none;transition:opacity 0.15s;" onclick="haptic('medium')">
             📞 Anrufen
           </a>
-          <a href="facetime:+491752230310" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;background:#475569;color:#fff;border-radius:12px;padding:11px 8px;font-size:14px;font-weight:700;text-decoration:none;" onclick="haptic('medium')">
+          <a href="facetime:+491752230310" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;background:#b8845a;color:#fff;border-radius:12px;padding:11px 8px;font-size:14px;font-weight:700;text-decoration:none;" onclick="haptic('medium')">
             📹 FaceTime
           </a>
         </div>
       </div>
 
       <!-- Nini -->
-      <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:16px;padding:14px 16px;">
+      <div style="background:#faf4ea;border:1.5px solid #e8d9c8;border-radius:16px;padding:14px 16px;">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-          <div style="width:44px;height:44px;border-radius:50%;background:#475569;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">👤</div>
+          <div style="width:44px;height:44px;border-radius:50%;background:#d4b896;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">👧</div>
           <div>
-            <div style="font-size:17px;font-weight:700;color:#1e293b;">Nini</div>
-            <div style="font-size:12px;color:#64748b;">+49 170 9876464</div>
+            <div style="font-size:17px;font-weight:700;color:#3d2b1f;">Nini</div>
+            <div style="font-size:12px;color:#8c7060;">+49 170 9876464</div>
           </div>
         </div>
         <div style="display:flex;gap:8px;">
-          <a href="tel:+491709876464" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;background:#1e293b;color:#fff;border-radius:12px;padding:11px 8px;font-size:14px;font-weight:700;text-decoration:none;" onclick="haptic('medium')">
+          <a href="tel:+491709876464" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;background:#d4a574;color:#fff;border-radius:12px;padding:11px 8px;font-size:14px;font-weight:700;text-decoration:none;" onclick="haptic('medium')">
             📞 Anrufen
           </a>
-          <a href="facetime:+491709876464" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;background:#475569;color:#fff;border-radius:12px;padding:11px 8px;font-size:14px;font-weight:700;text-decoration:none;" onclick="haptic('medium')">
+          <a href="facetime:+491709876464" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;background:#b8845a;color:#fff;border-radius:12px;padding:11px 8px;font-size:14px;font-weight:700;text-decoration:none;" onclick="haptic('medium')">
             📹 FaceTime
           </a>
         </div>
