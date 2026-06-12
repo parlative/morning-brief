@@ -516,11 +516,11 @@
 <div id="page-evening" class="page">
   <div class="summary-header" style="position:sticky;top:0;z-index:90;padding-top:max(env(safe-area-inset-top),48px);">
     <div class="summary-stars">⭐ ✨ 🌙</div>
-    <div class="summary-title">Abend-Zusammenfassung</div>
+    <div class="summary-title">Mein Abend</div>
     <div id="summary-date" class="summary-sub"></div>
-    <div style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
-      <span id="evening-last-update" style="font-size:11px;color:rgba(255,255,255,0.55);"></span>
-      <button onclick="haptic('medium'); renderSummary();" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;" id="evening-refresh-btn">↻</button>
+    <div class="last-update-row" style="margin-top:8px;">
+      <span id="evening-last-update" class="last-update" style="color:rgba(255,255,255,0.6);"></span>
+      <button onclick="haptic('medium'); renderSummary();" class="refresh-btn" id="evening-refresh-btn" style="color:rgba(255,255,255,0.7);">↻</button>
     </div>
   </div>
   <div class="summary-content" id="summary-content">
@@ -1464,7 +1464,7 @@ function renderSummary() {
   document.getElementById('summary-date').textContent=
     `📅 ${days[now.getDay()]}, ${now.getDate()}. ${months[now.getMonth()]} ${now.getFullYear()}`;
   document.getElementById('evening-last-update').textContent=
-    `Zuletzt aktualisiert: ${now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr`;
+    `🔄 Zuletzt: ${now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr`;
 
   // ── NIE GESPERRT: Vor 20 Uhr wird der gespeicherte Vortags-Snapshot gezeigt ──
   const EVENING_SNAP_KEY = 'maya_evening_snapshot';
